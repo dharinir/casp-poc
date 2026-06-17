@@ -3,6 +3,11 @@ from collections import abc
 import contextlib
 import json
 import os
+import traceback
+import re
+import urllib.request
+import google.auth
+from googleapiclient import discovery
 
 import fastapi
 from fastapi import responses
@@ -43,6 +48,12 @@ class ResolveResponse(pydantic.BaseModel):
 class InteractionResolveRequest(pydantic.BaseModel):
   session_id: str
   responses: list[ResolveResponse]
+
+
+class QueryRequest(pydantic.BaseModel):
+  query: str
+  context: str = ""
+  session_id: str = "default"
 
 
 app_state = {}
@@ -99,10 +110,79 @@ app.add_middleware(
 )
 
 
-async def stream_agent_execution(
-    query: str, session_id: str
-) -> abc.AsyncGenerator[str, None]:
-  """Streams agent steps and interactions as SSE."""
+DRIVE_URL_RE = re.compile(
+    r'https?://(?:docs|drive)\.google\.com/(?:document|file|spreadsheets)/d/([a-zA-Z0-9-_]+)'
+)
+URL_RE = re.compile(r'https?://[^\s\>]+') # Exclude trailing > if in markdown links
+
+
+def extract_drive_file_id(url: str) -> str | None:
+  match = DRIVE_URL_RE.search(url)
+  return match.group(1) if match else None
+
+
+def fetch_drive_file_content(file_id: str) -> str:
+  try:
+    credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/drive.readonly"])
+    quota_project = "dharinir-lags-codelab"
+    credentials = credentials.with_quota_project(quota_project)
+    drive_service = discovery.build("drive", "v3", credentials=credentials)
+    
+    file_metadata = drive_service.files().get(fileId=file_id, fields="mimeType,name").execute()
+    mime_type = file_metadata.get("mimeType", "")
+    name = file_metadata.get("name", "Document")
+    
+    if "document" in mime_type:
+      content = drive_service.files().export(fileId=file_id, mimeType="text/plain").execute()
+      return f"\n--- Content of Google Doc '{name}' ---\n{content.decode('utf-8')}\n--- End of Doc ---\n"
+    elif "spreadsheet" in mime_type:
+      content = drive_service.files().export(fileId=file_id, mimeType="text/csv").execute()
+      return f"\n--- Content of Google Sheet '{name}' (CSV) ---\n{content.decode('utf-8')}\n--- End of Sheet ---\n"
+    else:
+      content = drive_service.files().get_media(fileId=file_id).execute()
+      return f"\n--- Content of File '{name}' ---\n{content.decode('utf-8', errors='ignore')}\n--- End of File ---\n"
+  except Exception as e:
+    return f"\n[Error fetching Drive File {file_id}: {str(e)}]\n"
+
+
+def fetch_web_url_content(url: str) -> str:
+  if "docs.google.com" in url or "drive.google.com" in url:
+    return ""
+  try:
+    req = urllib.request.Request(
+        url, 
+        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    )
+    with urllib.request.urlopen(req, timeout=10) as response:
+      html = response.read().decode('utf-8', errors='ignore')
+      html = re.sub(r'<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>', '', html, flags=re.IGNORECASE)
+      html = re.sub(r'<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>', '', html, flags=re.IGNORECASE)
+      text = re.sub(r'<[^>]+>', ' ', html)
+      text = re.sub(r'\s+', ' ', text).strip()
+      return f"\n--- Content of Web URL '{url}' ---\n{text}\n--- End of Web Content ---\n"
+  except Exception as e:
+    return f"\n[Error fetching Web URL '{url}': {str(e)}]\n"
+
+
+def resolve_context_urls(context: str) -> str:
+  if not context:
+    return ""
+  resolved = context
+  urls = URL_RE.findall(context)
+  for url in urls:
+    drive_id = extract_drive_file_id(url)
+    if drive_id:
+      content = fetch_drive_file_content(drive_id)
+      resolved = resolved.replace(url, f"{url}\n{content}")
+    else:
+      content = fetch_web_url_content(url)
+      if content:
+        resolved = resolved.replace(url, f"{url}\n{content}")
+  return resolved
+
+
+async def init_agent_session(query: str, context: str, session_id: str) -> None:
+  """Initializes the agent session and starts the execution in the background."""
   agent_obj: agent.Agent = app_state["agent_obj"]
   sessions = app_state["sessions"]
 
@@ -205,7 +285,14 @@ async def stream_agent_execution(
   # Background agent loop runner
   async def run_agent():
     try:
-      await state.conv.send(query)
+      # Resolve URLs in a background thread
+      loop = asyncio.get_running_loop()
+      resolved_context = await loop.run_in_executor(None, resolve_context_urls, context)
+      
+      full_query = query
+      if resolved_context:
+        full_query += f"\n\nAdditional Context:\n{resolved_context}"
+      await state.conv.send(full_query)
       async for step in state.conv.receive_steps():
         if step is None:
           continue
@@ -214,14 +301,25 @@ async def stream_agent_execution(
         await state.queue.put({"type": "step", "step": step})
       await state.queue.put({"type": "done"})
     except Exception as e:
-      import traceback
-
       traceback.print_exc()
       await state.queue.put({"type": "error", "error": str(e)})
 
   state.task = asyncio.create_task(run_agent())
 
-  # Read events from queue and stream to client
+
+async def stream_agent_events(
+    session_id: str,
+) -> abc.AsyncGenerator[str, None]:
+  """Streams agent steps and interactions as SSE from the session queue."""
+  sessions = app_state["sessions"]
+  if session_id not in sessions:
+    yield (
+        "data:"
+        f" {json.dumps({'status': 'error', 'error': 'Session not found'})}\n\n"
+    )
+    return
+
+  state: SessionState = sessions[session_id]
   step_idx = 0
   while True:
     try:
@@ -301,24 +399,33 @@ async def get_dashboard_endpoint(dashboard_id: str):
       )
     return dashboard_data
   except Exception as e:
-    import traceback
-
     traceback.print_exc()
     raise fastapi.HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/api/query")
-async def query_endpoint(
-    query: str, session_id: str = "default"
+@app.post("/api/query/init")
+async def query_init_endpoint(req: QueryRequest):
+  """Initializes the query session."""
+  try:
+    await init_agent_session(req.query, req.context, req.session_id)
+    return {"status": "initialized", "session_id": req.session_id}
+  except Exception as e:
+    traceback.print_exc()
+    raise fastapi.HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/query/stream")
+async def query_stream_endpoint(
+    session_id: str = "default",
 ) -> responses.StreamingResponse:
-  """Endpoint to trigger a query and get streaming response."""
+  """Streams the agent execution steps."""
   headers = {
       "Cache-Control": "no-cache",
       "Connection": "keep-alive",
       "X-Accel-Buffering": "no",
   }
   return responses.StreamingResponse(
-      stream_agent_execution(query, session_id),
+      stream_agent_events(session_id),
       media_type="text/event-stream",
       headers=headers,
   )

@@ -922,6 +922,94 @@
       display: inline-block;
     }
 
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 50%;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+    }
+
+    .modal-form-group {
+      margin-bottom: 15px;
+    }
+
+    .modal-form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .modal-form-group input[type="text"],
+    .modal-form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background-color: #f1f3f4;
+      color: #3c4043;
+      border: 1px solid #dadce0;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e8eaed;
+    }
+
+    .btn-primary {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background-color: #1557b0;
+    }
+
   </style>
 </head>
 <body>
@@ -1392,7 +1480,7 @@
       }
     }
 
-    function startInvestigation(query) {
+    async function startInvestigation(query, additionalContext = "") {
       if (!query) return;
 
       // Switch to investigation tab and prepare layout
@@ -1428,7 +1516,31 @@
       appendLoadingMessage();
 
       currentSessionId = "session_" + Date.now();
-      eventSource = new EventSource(`/api/query?query=${encodeURIComponent(query)}&session_id=${currentSessionId}`);
+      
+      try {
+        const initResponse = await fetch('/api/query/init', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: query,
+            context: additionalContext,
+            session_id: currentSessionId
+          })
+        });
+        
+        if (!initResponse.ok) {
+          throw new Error(`Failed to initialize agent: ${initResponse.statusText}`);
+        }
+      } catch (e) {
+        console.error("Init failed:", e);
+        removeLoadingMessage();
+        appendChatMessage('system', "Connection Error: Could not initialize the RCA Agent.");
+        return;
+      }
+
+      eventSource = new EventSource(`/api/query/stream?session_id=${currentSessionId}`);
 
       eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
@@ -1623,13 +1735,101 @@
       }
     }
 
+    let pendingRCAData = null;
+
     function triggerRCA(sku, storeId, storeName) {
+      pendingRCAData = { sku, storeId, storeName };
+      openContextModal();
+    }
+
+    function openContextModal() {
+      document.getElementById('rcaContextModal').style.display = 'block';
+      document.getElementById('contextText').value = '';
+      document.getElementById('contextFile').value = '';
+    }
+
+    function closeContextModal() {
+      document.getElementById('rcaContextModal').style.display = 'none';
+      pendingRCAData = null;
+    }
+
+    function submitRCAWithoutContext() {
+      if (!pendingRCAData) return;
+      const { sku, storeId, storeName } = pendingRCAData;
       const query = `Stockout alert for SKU ${sku} in Store ${storeId} (${storeName})`;
+      closeContextModal();
       startInvestigation(query);
+    }
+
+    async function submitRCAWithContext() {
+      if (!pendingRCAData) return;
+      const { sku, storeId, storeName } = pendingRCAData;
+      
+      const contextText = document.getElementById('contextText').value.trim();
+      const fileInput = document.getElementById('contextFile');
+      let fileContent = "";
+      
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        try {
+          fileContent = await readFileAsText(file);
+        } catch (e) {
+          alert("Failed to read uploaded file: " + e.message);
+          return;
+        }
+      }
+      
+      let query = `Stockout alert for SKU ${sku} in Store ${storeId} (${storeName})`;
+      let additionalContext = "";
+      
+      if (contextText) {
+        additionalContext += `User provided context/link: ${contextText}\n`;
+      }
+      if (fileContent) {
+        additionalContext += `Uploaded file content:\n${fileContent}\n`;
+      }
+      
+      closeContextModal();
+      startInvestigation(query, additionalContext);
+    }
+
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => resolve(event.target.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsText(file);
+      });
     }
 
     // Load default dashboard on startup
     loadDashboard('Nq1GD8wyiQ2NMfyyfFjReY');
   </script>
+
+  <!-- RCA Context Modal -->
+  <div id="rcaContextModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeContextModal()">&times;</span>
+      <h3>Run RCA - Add Additional Context</h3>
+      <p style="font-size: 14px; color: #5f6368; margin-bottom: 20px;">
+        Optional: Provide additional local context (Description, URL, Drive link, or upload a document) to help the agent reason about the stockout.
+      </p>
+      
+      <div class="modal-form-group">
+        <label for="contextText">Description, Web URL, or Drive Link:</label>
+        <textarea id="contextText" rows="4" placeholder="Enter details, paste a URL or Drive link..."></textarea>
+      </div>
+      
+      <div class="modal-form-group">
+        <label for="contextFile">Upload Document (Text, CSV, JSON, MD):</label>
+        <input type="file" id="contextFile" accept=".txt,.csv,.json,.md">
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="submitRCAWithoutContext()">Skip / Run RCA</button>
+        <button class="btn-primary" onclick="submitRCAWithContext()">Run with Context</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
