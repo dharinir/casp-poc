@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Looker configuration (contains credentials)
+looker.ini
+
+# Jetski SDK binaries
+*.whl
+
+# OS / Editors
+.DS_Store
+.vscode/
+.idea/

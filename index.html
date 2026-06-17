@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RCA Copilot - Findings & Proposal</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      color: #3c4043;
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    
+    /* App Layout */
+    .app-container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+      width: 70px;
+      background-color: #ffffff;
+      border-right: 1px solid #dadce0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      width: 100%;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      color: #5f6368;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .menu-item:hover {
+      background-color: #f1f3f4;
+      color: #202124;
+    }
+    .menu-item.active {
+      background-color: #e8f0fe;
+      color: #1a73e8;
+    }
+    .menu-item .material-icons {
+      font-size: 24px;
+    }
+    
+    /* Main Content Area */
+    .main-container {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+    }
+    
+    /* Header Styles */
+    .header {
+      height: 56px;
+      border-bottom: 1px solid #dadce0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background-color: #ffffff;
+      flex-shrink: 0;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      height: 100%;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header-icon {
+      color: #5f6368;
+      cursor: pointer;
+    }
+    .header-icon:hover {
+      color: #202124;
+    }
+    .profile-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #dadce0;
+      background-image: url('https://lh3.googleusercontent.com/a/default-user=s64-c');
+      background-size: cover;
+    }
+    
+    /* Content Body */
+    .content-body {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 24px 40px;
+      box-sizing: border-box;
+    }
+    
+    /* Tab Contents */
+    .tab-content {
+      display: none;
+      height: 100%;
+    }
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Dashboard Tab Styles */
+    .dashboard-view {
+      background-color: white;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .dashboard-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: #202124;
+    }
+    .dashboard-desc {
+      font-size: 14px;
+      color: #5f6368;
+      margin-bottom: 24px;
+    }
+    .dashboard-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .dashboard-table th, .dashboard-table td {
+      border-bottom: 1px solid #dadce0;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 14px;
+    }
+    .dashboard-table th {
+      background-color: #f8f9fa;
+      font-weight: 500;
+      color: #5f6368;
+    }
+    .dashboard-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    .stockout-badge {
+      background-color: #fce8e6;
+      color: #c5221f;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .btn-run-rca {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-run-rca:hover {
+      background-color: #1557b0;
+    }
+    
+    /* Empty State / Initial State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #80868b;
+      gap: 16px;
+      padding: 40px;
+      text-align: center;
+    }
+    .empty-state .material-icons {
+      font-size: 48px;
+      color: #dadce0;
+    }
+    
+    /* Loading / Stepper State */
+    .loading-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      gap: 24px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1a73e8;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .stepper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #dadce0;
+      box-sizing: border-box;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #80868b;
+      font-size: 14px;
+    }
+    .step-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #dadce0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .step.active {
+      color: #1a73e8;
+      font-weight: 500;
+    }
+    .step.active .step-icon {
+      border-color: #1a73e8;
+      background-color: #e8f0fe;
+      color: #1a73e8;
+    }
+    .step.completed {
+      color: #1e8e3e;
+    }
+    .step.completed .step-icon {
+      border-color: #1e8e3e;
+      background-color: #e6f4ea;
+      color: #1e8e3e;
+    }
+    
+    /* Chat Console Logs (Debugging thoughts) */
+    .console-logs {
+      margin-top: 24px;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      background-color: #ffffff;
+      padding: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      display: none;
+    }
+    .log-entry { margin-bottom: 8px; }
+    .log-thought { color: #5f6368; }
+    .log-tool { color: #b06000; }
+    
+    /* RCA Report V2 (Mock replica) */
+    .rca-report-v2 {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .anomaly-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #c5221f;
+      background-color: #fce8e6;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      width: fit-content;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .anomaly-tag .material-icons {
+      font-size: 14px;
+    }
+    .report-header-v2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .report-title-v2 {
+      font-size: 24px;
+      font-weight: 500;
+      color: #202124;
+      margin: 0 0 6px 0;
+    }
+    .report-subtitle-v2 {
+      font-size: 13px;
+      color: #5f6368;
+      margin: 0;
+    }
+    .report-actions {
+      display: flex;
+      gap: 12px;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      box-sizing: border-box;
+      height: 36px;
+    }
+    .btn .material-icons {
+      font-size: 18px;
+    }
+    .btn-outline {
+      background-color: white;
+      border-color: #dadce0;
+      color: #1a73e8;
+    }
+    .btn-outline:hover {
+      background-color: #f8f9fa;
+      border-color: #cdd1d4;
+    }
+    .btn-filled {
+      background-color: #1a73e8;
+      color: white;
+    }
+    .btn-filled:hover {
+      background-color: #1557b0;
+    }
+    .btn-text {
+      background: none;
+      color: #1a73e8;
+      padding: 0 8px;
+      border: none;
+      height: auto;
+    }
+    .btn-text:hover {
+      background-color: #e8f0fe;
+    }
+    
+    /* Cards Layout */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      min-height: 240px;
+    }
+    .card-header-v2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      color: #5f6368;
+    }
+    .card-title-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title-v2 {
+      font-size: 16px;
+      font-weight: 500;
+      color: #202124;
+    }
+    .icon-obs { color: #d93025; }
+    .icon-rc { color: #1e8e3e; }
+    .card-body-v2 {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #3c4043;
+      flex-grow: 1;
+    }
+    .card-body-v2 p {
+      margin: 0;
+    }
+    .highlight-note {
+      background-color: #f8f9fa;
+      border-left: 4px solid #1a73e8;
+      padding: 12px 16px;
+      border-radius: 0 4px 4px 0;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .card-footer-v2 {
+      border-top: 1px solid #f1f3f4;
+      padding-top: 16px;
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #5f6368;
+    }
+    .duration-val {
+      color: #d93025;
+      font-weight: 700;
+    }
+    
+    /* Evidence Section */
+    .evidence-section {
+      background: white;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .evidence-header {
+      padding: 12px 24px;
+      border-bottom: 1px solid #dadce0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      font-size: 14px;
+      color: #202124;
+    }
+    .evidence-title-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sql-console {
+      background-color: #202124;
+      color: #f1f3f4;
+      padding: 20px 24px;
+      margin: 0;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+    
+    /* Proposed Solution Section */
+    .proposed-solution {
+      border: 1px dashed #1a73e8;
+      background-color: #e8f0fe;
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    .solution-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      max-width: 70%;
+    }
+    .icon-wand-container {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background-color: #d2e3fc;
+      color: #1a73e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .solution-text h3 {
+      font-size: 18px;
+      font-weight: 500;
+      margin: 0 0 4px 0;
+      color: #202124;
+    }
+    .solution-text p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+      color: #3c4043;
+    }
+    .solution-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .solution-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .model-graphic {
+      width: 100px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a73e8;
+      opacity: 0.6;
+    }
+    
+    /* Floating Chat bar for custom queries */
+    .custom-query-container {
+      margin-top: 32px;
+      display: flex;
+      gap: 12px;
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #dadce0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      align-items: center;
+    }
+    .custom-query-container input {
+      flex-grow: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    
+    /* Interaction Card */
+    .interaction-card {
+      background: white;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .interaction-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #1a73e8;
+      font-size: 16px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .interaction-header .material-icons {
+      font-size: 20px;
+    }
+    .interaction-content {
+      font-size: 14px;
+      color: #3c4043;
+      margin-bottom: 20px;
+    }
+    .interaction-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      border-top: 1px solid #f1f3f4;
+      padding-top: 16px;
+    }
+    .interaction-question {
+      margin-bottom: 20px;
+    }
+    .interaction-question-title {
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: #202124;
+    }
+    .interaction-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .interaction-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #3c4043;
+      padding: 6px 8px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .interaction-option:hover {
+      background: #f8f9fa;
+    }
+    .interaction-option input {
+      margin: 0;
+      cursor: pointer;
+    }
+    .interaction-text-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 14px;
+      margin-top: 8px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    
+    /* Chat Interface Styles */
+    .chat-interface {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      background: white;
+      overflow: hidden;
+      margin-bottom: 16px;
+      min-height: 350px;
+    }
+    .chat-messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chat-input-area {
+      display: flex;
+      padding: 8px 12px;
+      gap: 8px;
+      background: #f1f3f4;
+      border-radius: 24px;
+      align-items: center;
+      margin: 16px;
+    }
+    .chat-input-area input {
+      flex-grow: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 0;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+    .btn-send-chat {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-send-chat:hover {
+      background: #1557b0;
+    }
+    .message {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+      margin-bottom: 12px;
+    }
+    .message.agent {
+      background-color: #ffffff;
+      border: 1px solid #dadce0;
+      align-self: flex-start;
+      color: #202124;
+    }
+    .message.user {
+      background-color: #1a73e8;
+      align-self: flex-end;
+      color: #ffffff;
+    }
+    .message.alert {
+      background-color: #f1f3f4;
+      align-self: flex-start;
+      color: #202124;
+    }
+    .message.status {
+      background-color: transparent;
+      align-self: center;
+      color: #5f6368;
+      font-size: 11px;
+      font-style: italic;
+      padding: 4px 8px;
+      text-align: center;
+      width: 100%;
+    }
+    .chat-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+      width: 100%;
+    }
+    .chat-option-btn {
+      background: white;
+      border: 1px solid #1a73e8;
+      color: #1a73e8;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: left;
+      transition: background 0.15s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .chat-option-btn:hover {
+      background: #e8f0fe;
+    }
+    .chat-option-btn:disabled {
+      border-color: #dadce0;
+      color: #80868b;
+      background: #f8f9fa;
+      cursor: default;
+    }
+
+    /* Split Layout Styles */
+    .invest-split-layout {
+      display: flex;
+      gap: 24px;
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .invest-left-pane {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-width: 350px;
+      flex: 1;
+    }
+    .invest-right-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      overflow-y: auto;
+      height: 100%;
+      padding-right: 8px;
+      border-left: 1px solid #dadce0;
+      padding-left: 24px;
+      flex: 1.2;
+    }
+
+    /* Primary Root Cause Card */
+    .root-cause-card {
+      background-color: #f4f6fe;
+      border-left: 5px solid #1a73e8;
+      border-radius: 4px;
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .root-cause-icon {
+      color: #1a73e8;
+      background: #e8f0fe;
+      padding: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .root-cause-content h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #1a73e8;
+      font-weight: 700;
+    }
+    .root-cause-content p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #3c4043;
+    }
+
+    /* Bottom Grid */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    /* Donut Chart */
+    .donut-chart-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+    }
+    .donut-chart {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: conic-gradient(#1a73e8 calc(var(--percent) * 1%), #e8f0fe 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .donut-chart::before {
+      content: "";
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: white;
+    }
+    .donut-val {
+      position: relative;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a73e8;
+    }
+    .donut-label {
+      margin-top: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #202124;
+      letter-spacing: 0.5px;
+    }
+    .donut-sublabel {
+      font-size: 10px;
+      color: #5f6368;
+      margin-top: 4px;
+    }
+
+    /* Tool Calls Details in Chat */
+    .tool-calls-details {
+      background: #f1f3f4;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #3c4043;
+      margin-bottom: 12px;
+      width: fit-content;
+      border: 1px solid #dadce0;
+    }
+    .tool-calls-details summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .tool-calls-details summary::-webkit-details-marker {
+      display: none;
+    }
+    .tool-calls-details summary .arrow {
+      transition: transform 0.2s;
+    }
+    .tool-calls-details[open] summary .arrow {
+      transform: rotate(180deg);
+    }
+    .tool-calls-details ul {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      color: #5f6368;
+    }
+    .tool-calls-details li {
+      margin-bottom: 4px;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .rotating {
+      animation: spin 2s linear infinite;
+      display: inline-block;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <div class="logo-container" style="color: #1a73e8; margin-bottom: 20px;">
+        <span class="material-icons" style="font-size: 28px;">insights</span>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-item" id="menu-investigation" onclick="switchTab('investigation')" title="Investigation">
+          <span class="material-icons">troubleshoot</span>
+        </div>
+        <div class="menu-item active" id="menu-dashboard" onclick="switchTab('dashboard')" title="Dashboard">
+          <span class="material-icons">table_chart</span>
+        </div>
+        <div class="menu-item" id="menu-bq" onclick="alert('Opening BigQuery Explorer...')" title="BigQuery Explorer">
+          <span class="material-icons">storage</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Content Container -->
+    <div class="main-container">
+      
+      <!-- Top Header -->
+      <div class="header">
+        <div class="header-left">
+          <span class="brand-text" style="font-weight: 700; font-size: 16px; color: #202124;">Investigation Agent</span>
+        </div>
+        <div class="header-right">
+          <span class="material-icons header-icon" title="History">history</span>
+          <span class="material-icons header-icon" title="Settings">settings</span>
+          <div class="status-badge" style="display: flex; align-items: center; gap: 6px; background: #e8f0fe; color: #1a73e8; padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 500;">
+            <span style="width: 8px; height: 8px; background: #1a73e8; border-radius: 50%;"></span>
+            System Ready
+          </div>
+        </div>
+      </div>
+      
+      <!-- Body Content -->
+      <div class="content-body">
+        
+        <!-- DASHBOARD TAB -->
+        <div class="tab-content active" id="content-dashboard">
+          <div id="dashboardContainer" class="dashboard-view" style="display: none;"></div>
+          <div id="dashboardEmptyState" class="empty-state">
+            <span class="material-icons">dashboard</span>
+            <p>Loading your Looker Dashboard...</p>
+          </div>
+        </div>
+        
+        <!-- INVESTIGATION TAB -->
+        <div class="tab-content" id="content-investigation">
+          
+          <!-- Empty State (Before running) -->
+          <div id="investEmptyState" class="empty-state">
+            <span class="material-icons">query_stats</span>
+            <h3>No Investigation Active</h3>
+            <p>Go to the <strong>Dashboard</strong> tab to select a stockout anomaly, or enter a custom query below.</p>
+          </div>
+          
+          <!-- Active Investigation Layout -->
+          <!-- Active Investigation Layout -->
+          <div id="investActiveLayout" style="display: none; height: 100%;" class="invest-split-layout">
+            
+            <!-- Left Pane: Chat Interface -->
+            <div class="invest-left-pane">
+              <div class="report-header-v2" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dadce0; padding-bottom: 12px;">
+                <h2 class="report-title-v2" style="font-size: 16px; font-weight: 700; color: #202124;">Agent Investigation</h2>
+                <span class="material-icons" style="color: #5f6368; cursor: pointer;">more_vert</span>
+              </div>
+              
+              <div class="chat-interface">
+                <div class="chat-messages" id="chatMessages">
+                  <!-- Messages will be appended here -->
+                </div>
+                <div class="chat-input-area">
+                  <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
+                  <button class="btn-send-chat" id="sendChatBtn" onclick="sendChatMessage()">
+                    <span class="material-icons">send</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right Pane: Report View (Hidden initially, shown at the end) -->
+            <div class="invest-right-pane" id="investRightPane" style="display: none;">
+              <div class="report-header-v2">
+                <div>
+                  <h2 class="report-title-v2">Root Cause Analysis Report</h2>
+                  <p class="report-subtitle-v2" id="activeReportSubtitle">SKU-XXX Stockout Analysis</p>
+                </div>
+                <div class="report-actions" style="display: flex; gap: 8px;">
+                  <button class="btn btn-outline" style="border: none; display: flex; align-items: center; gap: 6px; padding: 8px 12px;" onclick="alert('Findings shared!')">
+                    <span class="material-icons" style="font-size: 18px;">share</span> Share
+                  </button>
+                  <button class="btn btn-outline" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px;" onclick="alert('Exporting PDF...')">
+                    <span class="material-icons" style="font-size: 18px;">file_download</span> Export PDF
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Primary Root Cause Alert Box -->
+              <div class="root-cause-card" id="rootCauseCard">
+                <div class="root-cause-icon">
+                  <span class="material-icons" style="font-size: 20px;">priority_high</span>
+                </div>
+                <div class="root-cause-content">
+                  <h3>Primary Root Cause</h3>
+                  <p id="rootCauseText"></p>
+                </div>
+              </div>
+              
+              <!-- Evidence Query Section -->
+              <div class="evidence-section" id="evidenceSection">
+                <!-- Dynamically populated -->
+              </div>
+              
+              <!-- Bottom Grid (Proposed Solution & Model Integrity) -->
+              <div class="bottom-grid">
+                <!-- Proposed Solution Card -->
+                <div class="card" style="min-height: auto; padding: 16px;">
+                  <div class="card-header-v2" style="margin-bottom: 12px; border-bottom: none; padding: 0;">
+                    <div class="card-title-container" style="display: flex; align-items: center; gap: 8px;">
+                      <span class="material-icons" style="color: #1a73e8; font-size: 20px;">lightbulb</span>
+                      <span class="card-title-v2" style="font-size: 14px; font-weight: 700; color: #202124;">Proposed Solution</span>
+                    </div>
+                  </div>
+                  <div class="card-body-v2" id="proposedSolutionBody" style="font-size: 13px; line-height: 1.6; padding: 0; color: #3c4043;">
+                    <!-- Content -->
+                  </div>
+                </div>
+                
+                <!-- Model Integrity Card -->
+                <div class="card" style="min-height: auto; align-items: center; justify-content: center; padding: 16px;">
+                  <div class="donut-chart-container">
+                    <div class="donut-chart" style="--percent: 98;">
+                      <span class="donut-val">98%</span>
+                    </div>
+                    <div class="donut-label">MODEL INTEGRITY</div>
+                    <div class="donut-sublabel">High-confidence attribution</div>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+            
+          </div>
+          
+
+          
+        </div>
+        
+        <!-- LIBRARY TAB (Mock) -->
+        <div class="tab-content" id="content-library">
+          <div class="empty-state">
+            <span class="material-icons">folder_open</span>
+            <h3>Saved Investigations</h3>
+            <p>No investigations saved yet.</p>
+          </div>
+        </div>
+        
+      </div>
+      
+    </div>
+
+
+    
+  </div>
+
+  <script>
+    const contentDashboard = document.getElementById('content-dashboard');
+    const contentInvestigation = document.getElementById('content-investigation');
+    const contentLibrary = document.getElementById('content-library');
+    
+    const dashboardContainer = document.getElementById('dashboardContainer');
+    const dashboardEmptyState = document.getElementById('dashboardEmptyState');
+    const investEmptyState = document.getElementById('investEmptyState');
+    const investActiveLayout = document.getElementById('investActiveLayout');
+    
+
+
+    let eventSource = null;
+    let accumulatedOutput = "";
+    let globalDashboardData = null;
+    let currentSessionId = null;
+    let activeInteractionQuestions = [];
+    let activeToolCalls = [];
+
+    function switchTab(tabName) {
+      // Reset active states
+      document.getElementById('menu-dashboard').classList.remove('active');
+      document.getElementById('menu-investigation').classList.remove('active');
+      
+      contentDashboard.className = 'tab-content';
+      contentInvestigation.className = 'tab-content';
+      contentLibrary.className = 'tab-content';
+      
+      if (tabName === 'dashboard') {
+        document.getElementById('menu-dashboard').classList.add('active');
+        contentDashboard.className = 'tab-content active';
+      } else if (tabName === 'investigation') {
+        document.getElementById('menu-investigation').classList.add('active');
+        contentInvestigation.className = 'tab-content active';
+      } else if (tabName === 'library') {
+        contentLibrary.className = 'tab-content active';
+      }
+    }
+
+    function appendConsoleLog(type, text) {
+      console.log(`[${type.toUpperCase()}] ${text}`);
+    }
+
+    function extractJson(text) {
+      const start = text.indexOf('{');
+      const end = text.lastIndexOf('}');
+      if (start !== -1 && end !== -1 && end > start) {
+        return text.substring(start, end + 1);
+      }
+      return null;
+    }
+
+    function updateRootCauseProgress(text) {
+      // Clean up markdown bold headers
+      let cleaned = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Skip generic tool interaction thoughts
+      if (text.includes("Tool Interaction") || text.includes("Tool Availability") || text.includes("Exploring Output Location") || text.includes("Exploring the sales_inv dataset")) {
+        return;
+      }
+      
+      const rcCardBody = document.getElementById('rcCardBody');
+      rcCardBody.innerHTML = `
+        <div style="font-size: 14px; line-height: 1.5; color: #3c4043;">
+          ${cleaned}
+        </div>
+      `;
+    }
+
+    function appendLoadingMessage() {
+      const chatMessages = document.getElementById('chatMessages');
+      
+      // Remove existing if any
+      removeLoadingMessage();
+      
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message status';
+      msgDiv.id = 'loadingMessage';
+      msgDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+          <span class="material-icons rotating" style="font-size: 16px; color: #1a73e8;">sync</span>
+          <span>Agent is investigating...</span>
+        </div>
+      `;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeLoadingMessage() {
+      const loadingMsg = document.getElementById('loadingMessage');
+      if (loadingMsg) {
+        loadingMsg.remove();
+      }
+    }
+
+    function appendChatMessage(sender, text, type = 'text', options = []) {
+      const chatMessages = document.getElementById('chatMessages');
+      const msgDiv = document.createElement('div');
+      
+      if (type === 'status') {
+        msgDiv.className = 'message status';
+        msgDiv.innerText = text;
+      } else {
+        msgDiv.className = `message ${sender}`;
+        // Clean up markdown bold and code blocks
+        let cleanedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        cleanedText = cleanedText.replace(/`(.*?)`/g, '<code>$1</code>');
+        msgDiv.innerHTML = `<div class="message-text">${cleanedText}</div>`;
+        
+        if (options && options.length > 0) {
+          const optionsDiv = document.createElement('div');
+          optionsDiv.className = 'chat-options';
+          
+          options.forEach(opt => {
+            const optBtn = document.createElement('button');
+            optBtn.className = 'chat-option-btn';
+            optBtn.innerText = opt.text;
+            optBtn.onclick = () => selectChatOption(opt.id, opt.text);
+            optionsDiv.appendChild(optBtn);
+          });
+          
+          msgDiv.appendChild(optionsDiv);
+        }
+      }
+      
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendFinalAgentMessage(report, toolCalls) {
+      const chatMessages = document.getElementById('chatMessages');
+      
+      // 1. Append tool calls collapsible if there were tool calls
+      if (toolCalls && toolCalls.length > 0) {
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'message status';
+        detailsDiv.style.padding = '0';
+        detailsDiv.style.alignSelf = 'flex-start';
+        detailsDiv.style.background = 'transparent';
+        
+        let listItems = toolCalls.map(tc => `<li>${tc.name}(${JSON.stringify(tc.args)})</li>`).join('');
+        
+        detailsDiv.innerHTML = `
+          <details class="tool-calls-details">
+            <summary>
+              <span class="material-icons" style="font-size: 16px; color: #1a73e8;">settings</span>
+              <span>Ran ${toolCalls.length} queries across Looker and BigQuery</span>
+              <span class="material-icons arrow" style="font-size: 16px; margin-left: auto;">expand_more</span>
+            </summary>
+            <ul>
+              ${listItems}
+            </ul>
+          </details>
+        `;
+        chatMessages.appendChild(detailsDiv);
+      }
+
+      // 2. Append Agent Message
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message agent';
+      
+      const summary = report.investigation_summary;
+      // Use proposed_solution if available, otherwise default question text
+      const solutionText = report.proposed_solution || "Would you like to model these tables?";
+      const text = `${summary}\n\n${solutionText}`;
+      
+      let cleanedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      cleanedText = cleanedText.replace(/`(.*?)`/g, '<code>$1</code>');
+      
+      let optionsHTML = '';
+      if (report.proposed_actions && report.proposed_actions.length > 0) {
+        optionsHTML = report.proposed_actions.map(action => {
+          let onClickStr = '';
+          if (action.id === 'generate_lookml') {
+            const tables = action.metadata?.tables_to_model?.join(',') || '';
+            onClickStr = `generateLookML('${tables}')`;
+          } else if (action.id === 'open_sql_workspace') {
+            onClickStr = `alert('Opening BigQuery Workspace...')`;
+          } else {
+            onClickStr = `alert('Triggered action: ${action.id}')`;
+          }
+          
+          const icon = action.icon ? `<span class="material-icons" style="font-size: 16px; margin-right: 6px;">${action.icon}</span>` : '';
+          const btnClass = action.id === 'generate_lookml' ? 'btn btn-filled' : 'btn btn-outline';
+          const styleStr = action.id === 'generate_lookml' ? 'width: auto; padding: 8px 16px; font-size: 13px;' : 'width: auto; padding: 8px 16px; font-size: 13px; color: #5f6368; border-color: #dadce0;';
+          
+          return `
+            <button class="${btnClass}" onclick="${onClickStr}" style="${styleStr}">
+              ${icon}${action.action_button_text}
+            </button>
+          `;
+        }).join('');
+      }
+      
+      msgDiv.innerHTML = `
+        <div class="message-text">${cleanedText.replace(/\n/g, '<br>')}</div>
+        <div class="chat-options" style="margin-top: 16px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;">
+          ${optionsHTML}
+        </div>
+      `;
+      
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function selectChatOption(optionId, optionText) {
+      appendChatMessage('user', optionText);
+      disableLastChatOptions();
+      
+      if (activeInteractionQuestions.length === 0) return;
+      
+      const responses = [{
+        selected_option_ids: [optionId],
+        write_in_response: "",
+        skipped: false
+      }];
+      
+      await submitInteractionResponse(responses);
+    }
+
+    async function sendChatMessage() {
+      const chatInput = document.getElementById('chatInput');
+      const text = chatInput.value.trim();
+      if (!text) return;
+      
+      appendChatMessage('user', text);
+      chatInput.value = "";
+      
+      if (activeInteractionQuestions.length > 0) {
+        disableLastChatOptions();
+        
+        const responses = [{
+          selected_option_ids: [],
+          write_in_response: text,
+          skipped: false
+        }];
+        
+        await submitInteractionResponse(responses);
+      } else {
+        appendChatMessage('agent', "I'm currently busy or not in an active session. Please start an investigation from the Dashboard tab.");
+      }
+    }
+    
+    function handleChatKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
+    function disableLastChatOptions() {
+      const chatMessages = document.getElementById('chatMessages');
+      const optionButtons = chatMessages.querySelectorAll('.chat-option-btn');
+      optionButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = 0.6;
+        btn.style.cursor = 'default';
+        btn.onclick = null;
+      });
+    }
+
+    async function submitInteractionResponse(responses) {
+      const chatInput = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('sendChatBtn');
+      if (chatInput) chatInput.disabled = true;
+      if (sendBtn) sendBtn.disabled = true;
+      
+      try {
+        const res = await fetch('/api/interaction/resolve', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            session_id: currentSessionId,
+            responses: responses
+          })
+        });
+        
+        if (!res.ok) {
+          throw new Error(await res.text());
+        }
+        
+        activeInteractionQuestions = [];
+        if (chatInput) chatInput.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+        chatInput.focus();
+        
+        // Show loading since agent resumes
+        appendLoadingMessage();
+
+      } catch (err) {
+        console.error("Failed to submit interaction:", err);
+        appendChatMessage('system', "Failed to submit response: " + err.message);
+        if (chatInput) chatInput.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+      }
+    }
+
+    function startInvestigation(query) {
+      if (!query) return;
+
+      // Switch to investigation tab and prepare layout
+      switchTab('investigation');
+      investEmptyState.style.display = 'none';
+      investActiveLayout.style.display = 'flex'; // Use flex for split layout
+      
+      // Hide right pane initially
+      document.getElementById('investRightPane').style.display = 'none';
+      
+      accumulatedOutput = "";
+      activeToolCalls = [];
+
+      // Clear chat messages
+      const chatMessages = document.getElementById('chatMessages');
+      chatMessages.innerHTML = "";
+
+      // Parse query details
+      const match = query.match(/Stockout alert for SKU (.*?) in Store (.*?) \((.*?)\)/);
+      let sku = "SKU-001";
+      let storeId = "STR-030";
+      let storeName = "Cross, Valdez and Wallace Shoes";
+      if (match) {
+        sku = match[1];
+        storeId = match[2];
+        storeName = match[3];
+      }
+
+      // Welcome message in chat (styled as alert)
+      appendChatMessage('alert', `System Alert: SKU-${sku} has experienced a stockout at Store ${storeId} (${storeName}). Can you investigate the root cause?`);
+
+      // Show loading status
+      appendLoadingMessage();
+
+      currentSessionId = "session_" + Date.now();
+      eventSource = new EventSource(`/api/query?query=${encodeURIComponent(query)}&session_id=${currentSessionId}`);
+
+      eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'interaction_required') {
+          handleInteractionRequired(data);
+          return;
+        }
+
+        if (data.status === 'done') {
+          eventSource.close();
+          removeLoadingMessage();
+          
+          try {
+            const jsonText = extractJson(accumulatedOutput);
+            if (!jsonText) {
+              throw new Error("No JSON report block found in agent output.");
+            }
+            const report = JSON.parse(jsonText.trim());
+            
+            // Append final agent response to chat
+            appendFinalAgentMessage(report, activeToolCalls);
+
+            // Show right pane and render report
+            document.getElementById('investRightPane').style.display = 'block';
+            renderRCAReport(query, report);
+            
+
+          } catch (e) {
+            console.error("Failed to parse JSON:", e);
+            appendChatMessage('agent', "Error rendering report. See console logs.");
+            document.getElementById('investRightPane').style.display = 'block';
+            // Fallback render to root cause text if box exists
+            const rcText = document.getElementById('rootCauseText');
+            if (rcText) {
+              rcText.innerHTML = `<div style="color:red; font-weight:500;">Error rendering report</div><pre style="white-space: pre-wrap; font-size:12px;">${accumulatedOutput}</pre>`;
+            }
+          }
+          return;
+        }
+
+        if (data.type === 'thought') {
+          appendConsoleLog('thought', data.text);
+        } else if (data.type === 'tool_call') {
+          appendConsoleLog('tool', `${data.name}(${data.args})`);
+          activeToolCalls.push({ name: data.name, args: data.args });
+          // REMOVED calling tool status message in chat to keep it clean
+        } else if (data.type === 'final_output') {
+          accumulatedOutput += data.text;
+          // REMOVED showStatusInChat call
+        }
+      };
+
+       eventSource.onerror = function(err) {
+        console.error("SSE Error:", err);
+        eventSource.close();
+        removeLoadingMessage();
+        appendChatMessage('system', "Connection Error: Could not reach the RCA Agent server.");
+      };
+    }
+
+    function handleInteractionRequired(data) {
+      removeLoadingMessage(); // Remove loading before showing question
+      activeInteractionQuestions = data.questions;
+      
+      data.questions.forEach((q) => {
+        if (q.options && q.options.length > 0) {
+          appendChatMessage('agent', q.question, 'text', q.options);
+        } else {
+          appendChatMessage('agent', q.question + " (Please type your response below)");
+        }
+      });
+    }
+
+    function renderRCAReport(query, report) {
+      const match = query.match(/Stockout alert for SKU (.*?) in Store (.*?) \((.*?)\)/);
+      let sku = "SKU-001";
+      if (match) {
+        sku = match[1];
+      }
+      document.getElementById('activeReportSubtitle').innerText = `${sku} Stockout Analysis`;
+
+      // 1. Populate Primary Root Cause Text
+      document.getElementById('rootCauseText').innerText = report.root_cause;
+
+      // 2. Populate Evidence Section
+      const tableQueried = report.evidence.tables_queried[0] || 'project.dataset.shipments';
+      document.getElementById('evidenceSection').innerHTML = `
+        <div class="evidence-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div class="evidence-title-container" style="display: flex; align-items: center; gap: 8px;">
+            <span class="material-icons" style="color: #5f6368; font-size: 18px;">storage</span>
+            <span style="font-size: 11px; font-weight: 700; color: #5f6368; letter-spacing: 0.8px;">EVIDENCE: INVESTIGATORY QUERY</span>
+          </div>
+          <span style="font-size: 11px; font-weight: 700; color: #1a73e8; background: #e8f0fe; padding: 4px 8px; border-radius: 4px; letter-spacing: 0.5px;">BigQuery SQL</span>
+        </div>
+        <div class="sql-container" style="border: 1px solid #dadce0; border-radius: 8px; overflow: hidden; background: #202124;">
+          <div class="sql-header" style="background: #2d2f31; color: #e8eaed; padding: 10px 16px; font-family: 'Roboto Mono', monospace; font-size: 11px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3c4043;">
+            <span>shipment_latency_check.sql</span>
+            <span class="material-icons" style="font-size: 16px; cursor: pointer; color: #9aa0a6;" onclick="navigator.clipboard.writeText(\`${report.evidence.sql_executed.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`); alert('Query copied!')">content_copy</span>
+          </div>
+          <pre class="sql-console" style="margin: 0; border-radius: 0; padding: 16px; background: #202124; color: #f1f3f4; font-size: 12px; line-height: 1.5; overflow-x: auto;"><code>${report.evidence.sql_executed}</code></pre>
+        </div>
+      `;
+
+      // 3. Populate Proposed Solution Body
+      const solutionText = report.proposed_solution || "Model the unmodeled tables in Looker to enable visibility.";
+      let cleanedSolutionText = solutionText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      cleanedSolutionText = cleanedSolutionText.replace(/`/g, '<code>$1</code>');
+      document.getElementById('proposedSolutionBody').innerHTML = `<p style="margin:0;">${cleanedSolutionText}</p>`;
+    }
+
+    function generateLookML(tables) {
+      alert(`Requesting LookML generation for tables: ${tables}. This will trigger the LookML generation tool...`);
+    }
+
+    async function loadDashboard(dashboardId) {
+      dashboardEmptyState.style.display = 'flex';
+      dashboardContainer.style.display = 'none';
+      
+      try {
+        const response = await fetch(`/api/dashboard/${dashboardId}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const dashboard = await response.json();
+        globalDashboardData = dashboard;
+        
+        dashboardEmptyState.style.display = 'none';
+        dashboardContainer.style.display = 'block';
+        
+        dashboardContainer.innerHTML = `<h2 class="dashboard-title">${dashboard.title}</h2>`;
+        if (dashboard.description) {
+          dashboardContainer.innerHTML += `<p class="dashboard-desc">${dashboard.description}</p>`;
+        }
+        
+        for (const tile of dashboard.tiles) {
+          const tileDiv = document.createElement('div');
+          tileDiv.style.marginBottom = "24px";
+          tileDiv.innerHTML = `<h3 style="font-size: 15px; font-weight: 500; margin-bottom: 12px; color: #3c4043;">${tile.title}</h3>`;
+          
+          if (tile.error) {
+            tileDiv.innerHTML += `<div style="color: red; font-size: 14px;">Error: ${tile.error}</div>`;
+          } else if (tile.data && tile.data.length > 0) {
+            const table = document.createElement('table');
+            table.className = "dashboard-table";
+            
+            const headers = Object.keys(tile.data[0]);
+            const headerRow = document.createElement('tr');
+            for (const h of headers) {
+              const th = document.createElement('th');
+              th.innerText = h.split('.').pop().replace(/_/g, ' '); // Clean names (e.g. products.product_desc -> product desc)
+              headerRow.appendChild(th);
+            }
+            const thAction = document.createElement('th');
+            thAction.innerText = "Actions";
+            headerRow.appendChild(thAction);
+            table.appendChild(headerRow);
+            
+            for (const row of tile.data) {
+              const tr = document.createElement('tr');
+              for (const h of headers) {
+                const td = document.createElement('td');
+                const val = row[h];
+                if (h === 'inventory.stockout' && val === 'Yes') {
+                  td.innerHTML = `<span class="stockout-badge">Stockout</span>`;
+                } else {
+                  td.innerText = val !== null ? val : "";
+                }
+                tr.appendChild(td);
+              }
+              
+              const tdAction = document.createElement('td');
+              const sku = row['inventory.sku'] || row['sku'];
+              const storeId = row['inventory.store_id'] || row['store_id'];
+              const storeName = row['store.store_name'] || row['store_name'] || "Store " + storeId;
+              
+              if (sku && storeId) {
+                tdAction.innerHTML = `<button class="btn-run-rca" onclick="triggerRCA('${sku}', '${storeId}', '${storeName}')">Run RCA</button>`;
+              }
+              tr.appendChild(tdAction);
+              table.appendChild(tr);
+            }
+            tileDiv.appendChild(table);
+          } else {
+            tileDiv.innerHTML += `<div style="font-size: 14px; color: #5f6368;">No data returned.</div>`;
+          }
+          dashboardContainer.appendChild(tileDiv);
+        }
+      } catch (e) {
+        console.error("Failed to load dashboard:", e);
+        dashboardEmptyState.innerHTML = `<span class="material-icons" style="color:red;">error_outline</span><p style="color: red;">Failed to load dashboard: ${e.message}</p>`;
+      }
+    }
+
+    function triggerRCA(sku, storeId, storeName) {
+      const query = `Stockout alert for SKU ${sku} in Store ${storeId} (${storeName})`;
+      startInvestigation(query);
+    }
+
+    // Load default dashboard on startup
+    loadDashboard('Nq1GD8wyiQ2NMfyyfFjReY');
+  </script>
+</body>
+</html>
