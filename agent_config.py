@@ -80,8 +80,11 @@ def get_agent_config() -> types.AgentConfig:
       mcp_servers=[
           types.McpServerSpec(
               server_name="looker_alert_helper",
-              command="python3",
-              args=["looker_tool.py"],
+              server_url="https://78e1dc51-1aad-43b1-b24d-3557045db072.looker.app/mcp",
+              oauth=types.McpOAuthConfig(
+                  client_id="YOUR_LOOKER_CLIENT_GUID",
+                  client_secret="dummy_secret",
+              ),
               skip_tool_name_prefix=True,
           )
       ],
