@@ -3,15 +3,17 @@ from collections import abc
 import contextlib
 import json
 import os
-import traceback
 import re
+import traceback
 import urllib.request
-import google.auth
-from googleapiclient import discovery
 
+from absl import app as absl_app
 import fastapi
 from fastapi import responses
 from fastapi.middleware import cors
+import google.auth
+from googleapiclient import discovery
+from googleapiclient import errors
 import pydantic
 import uvicorn
 
@@ -19,6 +21,7 @@ import agent_config
 import looker_tool
 from jetski_sdk.protos import trajectory_pb2
 from jetski_sdk.protos import cortex_pb2
+from jetski_sdk.protos import language_server_pb2
 from jetski_sdk import agent
 from jetski_sdk import client
 from jetski_sdk import conversation
@@ -111,9 +114,11 @@ app.add_middleware(
 
 
 DRIVE_URL_RE = re.compile(
-    r'https?://(?:docs|drive)\.google\.com/(?:document|file|spreadsheets)/d/([a-zA-Z0-9-_]+)'
+    r"https?://(?:docs|drive)\.google\.com/(?:document|file|spreadsheets)/d/([a-zA-Z0-9-_]+)"
 )
-URL_RE = re.compile(r'https?://[^\s\>]+') # Exclude trailing > if in markdown links
+URL_RE = re.compile(
+    r"https?://[^\s\>]+"
+)  # Exclude trailing > if in markdown links
 
 
 def extract_drive_file_id(url: str) -> str | None:
@@ -123,25 +128,76 @@ def extract_drive_file_id(url: str) -> str | None:
 
 def fetch_drive_file_content(file_id: str) -> str:
   try:
-    credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/drive.readonly"])
+    print(f"fetch_drive_file_content: starting for {file_id}", flush=True)
+    credentials, _ = google.auth.default(
+        scopes=["https://www.googleapis.com/auth/drive.readonly"]
+    )
     quota_project = "dharinir-lags-codelab"
     credentials = credentials.with_quota_project(quota_project)
     drive_service = discovery.build("drive", "v3", credentials=credentials)
-    
-    file_metadata = drive_service.files().get(fileId=file_id, fields="mimeType,name").execute()
+
+    file_metadata = (
+        drive_service.files()
+        .get(fileId=file_id, fields="mimeType,name")
+        .execute()
+    )
     mime_type = file_metadata.get("mimeType", "")
     name = file_metadata.get("name", "Document")
-    
+    print(
+        f"fetch_drive_file_content: file name='{name}', mime='{mime_type}'",
+        flush=True,
+    )
+
     if "document" in mime_type:
-      content = drive_service.files().export(fileId=file_id, mimeType="text/plain").execute()
-      return f"\n--- Content of Google Doc '{name}' ---\n{content.decode('utf-8')}\n--- End of Doc ---\n"
+      content = (
+          drive_service.files()
+          .export(fileId=file_id, mimeType="text/plain")
+          .execute()
+      )
+      print("fetch_drive_file_content: exported doc successfully", flush=True)
+      return (
+          f"\n--- Content of Google Doc '{name}'"
+          f" ---\n{content.decode('utf-8')}\n--- End of Doc ---\n"
+      )
     elif "spreadsheet" in mime_type:
-      content = drive_service.files().export(fileId=file_id, mimeType="text/csv").execute()
-      return f"\n--- Content of Google Sheet '{name}' (CSV) ---\n{content.decode('utf-8')}\n--- End of Sheet ---\n"
+      content = (
+          drive_service.files()
+          .export(fileId=file_id, mimeType="text/csv")
+          .execute()
+      )
+      print("fetch_drive_file_content: exported sheet successfully", flush=True)
+      return (
+          f"\n--- Content of Google Sheet '{name}' (CSV)"
+          f" ---\n{content.decode('utf-8')}\n--- End of Sheet ---\n"
+      )
     else:
       content = drive_service.files().get_media(fileId=file_id).execute()
-      return f"\n--- Content of File '{name}' ---\n{content.decode('utf-8', errors='ignore')}\n--- End of File ---\n"
+      print(
+          "fetch_drive_file_content: downloaded file successfully", flush=True
+      )
+      return (
+          f"\n--- Content of File '{name}'"
+          f" ---\n{content.decode('utf-8', errors='ignore')}\n--- End of File"
+          " ---\n"
+      )
+  except errors.HttpError as e:
+    print(
+        f"HTTP Error fetching Drive file {file_id}: {traceback.format_exc()}",
+        flush=True,
+    )
+    if e.resp.status == 403:
+      return (
+          f"\n[Error fetching Drive File {file_id}: Insufficient Permission"
+          " (403). Please run 'gcloud auth application-default login"
+          " --scopes=https://www.googleapis.com/auth/drive.readonly,https://www.googleapis.com/auth/cloud-platform'"
+          " in your terminal and restart the server.]\n"
+      )
+    return f"\n[Error fetching Drive File {file_id}: {str(e)}]\n"
   except Exception as e:
+    print(
+        f"Error fetching Drive file {file_id}: {traceback.format_exc()}",
+        flush=True,
+    )
     return f"\n[Error fetching Drive File {file_id}: {str(e)}]\n"
 
 
@@ -149,35 +205,61 @@ def fetch_web_url_content(url: str) -> str:
   if "docs.google.com" in url or "drive.google.com" in url:
     return ""
   try:
+    print(f"fetch_web_url_content: starting for {url}", flush=True)
     req = urllib.request.Request(
-        url, 
-        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     )
     with urllib.request.urlopen(req, timeout=10) as response:
-      html = response.read().decode('utf-8', errors='ignore')
-      html = re.sub(r'<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>', '', html, flags=re.IGNORECASE)
-      html = re.sub(r'<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>', '', html, flags=re.IGNORECASE)
-      text = re.sub(r'<[^>]+>', ' ', html)
-      text = re.sub(r'\s+', ' ', text).strip()
-      return f"\n--- Content of Web URL '{url}' ---\n{text}\n--- End of Web Content ---\n"
+      html = response.read().decode("utf-8", errors="ignore")
+      html = re.sub(
+          r"<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>",
+          "",
+          html,
+          flags=re.IGNORECASE,
+      )
+      html = re.sub(
+          r"<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>",
+          "",
+          html,
+          flags=re.IGNORECASE,
+      )
+      text = re.sub(r"<[^>]+>", " ", html)
+      text = re.sub(r"\s+", " ", text).strip()
+      print(
+          f"fetch_web_url_content: fetched successfully, length={len(text)}",
+          flush=True,
+      )
+      return (
+          f"\n--- Content of Web URL '{url}' ---\n{text}\n--- End of Web"
+          " Content ---\n"
+      )
   except Exception as e:
+    print(f"Error fetching Web URL {url}: {traceback.format_exc()}", flush=True)
     return f"\n[Error fetching Web URL '{url}': {str(e)}]\n"
 
 
 def resolve_context_urls(context: str) -> str:
+  print(f"resolve_context_urls: input context: {context}", flush=True)
   if not context:
     return ""
   resolved = context
   urls = URL_RE.findall(context)
+  print(f"resolve_context_urls: found URLs: {urls}", flush=True)
   for url in urls:
     drive_id = extract_drive_file_id(url)
     if drive_id:
+      print(f"resolve_context_urls: resolving Drive URL {url}", flush=True)
       content = fetch_drive_file_content(drive_id)
-      resolved = resolved.replace(url, f"{url}\n{content}")
+      resolved = resolved.replace(url, content)
     else:
+      print(f"resolve_context_urls: resolving Web URL {url}", flush=True)
       content = fetch_web_url_content(url)
       if content:
-        resolved = resolved.replace(url, f"{url}\n{content}")
+        resolved = resolved.replace(url, content)
+  print(
+      f"resolve_context_urls: resolved context preview: {resolved[:500]}...",
+      flush=True,
+  )
   return resolved
 
 
@@ -202,6 +284,10 @@ async def init_agent_session(query: str, context: str, session_id: str) -> None:
 
         response = cortex_pb2.CascadeUserInteraction()
         if interaction_type == "permission":
+          print(
+              f"[{sid}] Permission request: {requested_interaction.permission}",
+              flush=True,
+          )
           response.permission.allow = True
           return response
         elif interaction_type == "file_permission":
@@ -287,8 +373,10 @@ async def init_agent_session(query: str, context: str, session_id: str) -> None:
     try:
       # Resolve URLs in a background thread
       loop = asyncio.get_running_loop()
-      resolved_context = await loop.run_in_executor(None, resolve_context_urls, context)
-      
+      resolved_context = await loop.run_in_executor(
+          None, resolve_context_urls, context
+      )
+
       full_query = query
       if resolved_context:
         full_query += f"\n\nAdditional Context:\n{resolved_context}"
@@ -431,6 +519,72 @@ async def query_stream_endpoint(
   )
 
 
+@app.get("/api/mcp/states")
+async def get_mcp_states():
+  """Returns the current state of all MCP servers."""
+  sdk_client = app_state.get("sdk_client")
+  # pylint: disable=protected-access
+  if not sdk_client or not sdk_client._stub:
+    raise fastapi.HTTPException(
+        status_code=500,
+        detail="SDK client not initialized or connection unavailable.",
+    )
+
+  req = language_server_pb2.GetMcpServerStatesRequest()
+  try:
+    resp: language_server_pb2.GetMcpServerStatesResponse = (
+        await sdk_client._stub.GetMcpServerStates(req)
+    )
+    # pylint: enable=protected-access
+    states = []
+    for s in resp.states:
+      states.append({
+          "server_name": s.spec.server_name,
+          "server_url": s.spec.server_url,
+          "status": s.status,
+          "error": s.error,
+          "has_auth_token": s.has_auth_token,
+          "auth_url": s.auth_url,
+      })
+    return {"states": states, "is_loading": resp.is_loading}
+  except Exception as e:
+    traceback.print_exc()
+    raise fastapi.HTTPException(
+        status_code=500, detail=f"gRPC call failed: {e}"
+    )
+
+
+class CompleteOAuthRequest(pydantic.BaseModel):
+  server_name: str
+  code: str
+
+
+@app.post("/api/mcp/complete_oauth")
+async def complete_mcp_oauth(req: CompleteOAuthRequest):
+  """Completes the OAuth flow for an MCP server."""
+  sdk_client = app_state.get("sdk_client")
+  # pylint: disable=protected-access
+  if not sdk_client or not sdk_client._stub:
+    raise fastapi.HTTPException(
+        status_code=500,
+        detail="SDK client not initialized or connection unavailable.",
+    )
+
+  g_req = language_server_pb2.CompleteMcpOAuthRequest(
+      server_name=req.server_name,
+      authorization_code=req.code,
+  )
+  try:
+    await sdk_client._stub.CompleteMcpOAuth(g_req)
+    # pylint: enable=protected-access
+    return {"status": "success"}
+  except Exception as e:
+    traceback.print_exc()
+    raise fastapi.HTTPException(
+        status_code=500, detail=f"gRPC call failed: {e}"
+    )
+
+
 @app.post("/api/interaction/resolve")
 async def resolve_interaction_endpoint(req: InteractionResolveRequest):
   """Endpoint to resolve a pending interaction for a session."""
@@ -453,6 +607,11 @@ async def resolve_interaction_endpoint(req: InteractionResolveRequest):
   return {"status": "success"}
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+  del argv  # Unused
   port = int(os.environ.get("PORT", 8000))
   uvicorn.run(app, host="0.0.0.0", port=port)
+
+
+if __name__ == "__main__":
+  absl_app.run(main)

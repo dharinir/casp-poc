@@ -1010,6 +1010,67 @@
       background-color: #1557b0;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 8px;
+      width: 75%;
+      max-width: 800px;
+      height: 80%;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .modal-card-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #dadce0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-card-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: #202124;
+    }
+    .modal-close-btn {
+      background: none;
+      border: none;
+      color: #5f6368;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 50%;
+    }
+    .modal-close-btn:hover {
+      background-color: #f1f3f4;
+      color: #202124;
+    }
+    .modal-card-body {
+      padding: 24px;
+      overflow: auto;
+      background-color: #f8f9fa;
+      flex-grow: 1;
+    }
+    .modal-card-body pre {
+      margin: 0;
+    }
+
   </style>
 </head>
 <body>
@@ -1146,13 +1207,13 @@
                   </div>
                 </div>
                 
-                <!-- Model Integrity Card -->
+                <!-- Attribution Confidence Card -->
                 <div class="card" style="min-height: auto; align-items: center; justify-content: center; padding: 16px;">
                   <div class="donut-chart-container">
                     <div class="donut-chart" style="--percent: 98;">
                       <span class="donut-val">98%</span>
                     </div>
-                    <div class="donut-label">MODEL INTEGRITY</div>
+                    <div class="donut-label">ATTRIBUTION CONFIDENCE</div>
                     <div class="donut-sublabel">High-confidence attribution</div>
                   </div>
                 </div>
@@ -1180,7 +1241,21 @@
     </div>
 
 
-    
+  </div>
+
+  <!-- LookML Code Modal -->
+  <div id="lookmlModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <h3 class="modal-card-title" id="lookmlModalTitle">View LookML View</h3>
+        <button class="modal-close-btn" onclick="closeLookmlModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-card-body">
+        <pre><code id="lookmlModalCode" style="font-family: 'Roboto Mono', monospace; font-size: 13px; line-height: 1.5; color: #202124;"></code></pre>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1251,6 +1326,48 @@
       `;
     }
 
+    const STATUS_PHRASES = [
+      "Formulating RCA Reasoning...",
+      "Searching Knowledge Catalog for existing Looker assets...",
+      "Discovering base BigQuery tables for Dashboard...",
+      "Traversing BigQuery Graph for related operational tables...",
+      "Inspecting metadata and data lineage in Knowledge Catalog...",
+      "Executing SQL to validate shipment reasoning..."
+    ];
+    let currentStatusText = "Agent is investigating...";
+
+    function getLatestStatus(text) {
+      let latestStatus = "";
+      let latestIndex = -1;
+      STATUS_PHRASES.forEach((phrase) => {
+        const idx = text.lastIndexOf(phrase);
+        if (idx > latestIndex) {
+          latestIndex = idx;
+          latestStatus = phrase;
+        }
+      });
+      return latestStatus;
+    }
+
+    function updateLoaderStatus(text) {
+      const status = getLatestStatus(text);
+      if (status) {
+        currentStatusText = status;
+        const textSpan = document.getElementById('loadingMessageText');
+        if (textSpan) {
+          textSpan.innerText = `Agent: ${currentStatusText}`;
+        }
+      }
+    }
+
+    function updateLoaderTool(toolName) {
+      const textSpan = document.getElementById('loadingMessageText');
+      if (textSpan) {
+        const cleanName = toolName.replace(/^mcp_/, '');
+        textSpan.innerText = `Agent: ${currentStatusText} (${cleanName})`;
+      }
+    }
+
     function appendLoadingMessage() {
       const chatMessages = document.getElementById('chatMessages');
       
@@ -1263,7 +1380,7 @@
       msgDiv.innerHTML = `
         <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
           <span class="material-icons rotating" style="font-size: 16px; color: #1a73e8;">sync</span>
-          <span>Agent is investigating...</span>
+          <span id="loadingMessageText">Agent is investigating...</span>
         </div>
       `;
       chatMessages.appendChild(msgDiv);
@@ -1550,6 +1667,13 @@
           return;
         }
 
+        if (data.status === 'error') {
+          eventSource.close();
+          removeLoadingMessage();
+          appendChatMessage('system', `Agent Error: ${data.error}`);
+          return;
+        }
+
         if (data.status === 'done') {
           eventSource.close();
           removeLoadingMessage();
@@ -1587,10 +1711,10 @@
         } else if (data.type === 'tool_call') {
           appendConsoleLog('tool', `${data.name}(${data.args})`);
           activeToolCalls.push({ name: data.name, args: data.args });
-          // REMOVED calling tool status message in chat to keep it clean
+          updateLoaderTool(data.name);
         } else if (data.type === 'final_output') {
           accumulatedOutput += data.text;
-          // REMOVED showStatusInChat call
+          updateLoaderStatus(accumulatedOutput);
         }
       };
 
@@ -1652,8 +1776,121 @@
       document.getElementById('proposedSolutionBody').innerHTML = `<p style="margin:0;">${cleanedSolutionText}</p>`;
     }
 
-    function generateLookML(tables) {
-      alert(`Requesting LookML generation for tables: ${tables}. This will trigger the LookML generation tool...`);
+    async function generateLookML(tables) {
+      appendChatMessage('user', `Generate LookML for tables: ${tables}`);
+      disableLastChatOptions();
+      appendLoadingMessage();
+      
+      const query = `The user has approved the generation of LookML for the following tables: ${tables}. Please generate the LookML views for these tables. Make sure to find the active model's project and connection first, switch to development mode, create the views, and validate the project.`;
+      
+      try {
+        const initResponse = await fetch('/api/query/init', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: query,
+            context: "",
+            session_id: currentSessionId
+          })
+        });
+        
+        if (!initResponse.ok) {
+          throw new Error(`Failed to initialize LookML generation: ${initResponse.statusText}`);
+        }
+        
+        // Re-establish EventSource stream to receive steps
+        if (eventSource) {
+          eventSource.close();
+        }
+        
+        eventSource = new EventSource(`/api/query/stream?session_id=${currentSessionId}`);
+        accumulatedOutput = "";
+        
+        eventSource.onmessage = function(event) {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'interaction_required') {
+            handleInteractionRequired(data);
+            return;
+          }
+          
+          if (data.status === 'done') {
+            eventSource.close();
+            removeLoadingMessage();
+            
+            try {
+              const jsonText = extractJson(accumulatedOutput);
+              if (!jsonText) {
+                throw new Error("No JSON report block found in LookML generation output.");
+              }
+              const result = JSON.parse(jsonText.trim());
+              
+              const msgDiv = document.createElement('div');
+              msgDiv.className = 'message agent';
+              
+              let cleanedSummary = (result.summary || "LookML views successfully generated.").replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+              
+              let buttonsHTML = '';
+              if (result.generated_views && result.generated_views.length > 0) {
+                window.generatedLookmlCode = window.generatedLookmlCode || {};
+                
+                result.generated_views.forEach((view, idx) => {
+                  const key = `view_${Date.now()}_${idx}`;
+                  window.generatedLookmlCode[key] = {
+                    title: view.file_path,
+                    content: view.view_content
+                  };
+                  buttonsHTML += `
+                    <button class="btn btn-outline" onclick="openLookmlModal(window.generatedLookmlCode['${key}'].title, window.generatedLookmlCode['${key}'].content)" style="width: auto; padding: 8px 12px; font-size: 13px; margin-right: 8px; color: #1a73e8; border-color: #dadce0;">
+                      <span class="material-icons" style="font-size: 16px; margin-right: 6px;">visibility</span>
+                      View ${view.file_path.split('/').pop()}
+                    </button>
+                  `;
+                });
+              }
+              
+              msgDiv.innerHTML = `
+                <div class="message-text">${cleanedSummary}</div>
+                <div class="chat-options" style="margin-top: 12px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;">
+                  ${buttonsHTML}
+                </div>
+              `;
+              
+              const chatMessages = document.getElementById('chatMessages');
+              chatMessages.appendChild(msgDiv);
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            } catch (e) {
+              console.error("Failed to parse LookML JSON:", e);
+              // Fallback
+              appendChatMessage('agent', accumulatedOutput || "LookML generation completed successfully.");
+            }
+            return;
+          }
+          
+          if (data.type === 'thought') {
+            appendConsoleLog('thought', data.text);
+          } else if (data.type === 'tool_call') {
+            appendConsoleLog('tool', `${data.name}(${data.args})`);
+          } else if (data.type === 'final_output') {
+            accumulatedOutput += data.text;
+          }
+        };
+        
+        eventSource.onerror = function(err) {
+          console.error("SSE Error:", err);
+          eventSource.close();
+          removeLoadingMessage();
+          appendChatMessage('system', "Error during LookML generation.");
+        };
+        
+      } catch (e) {
+        console.error("Failed to trigger LookML generation:", e);
+        removeLoadingMessage();
+        appendChatMessage('system', "Error: " + e.message);
+      }
     }
 
     async function loadDashboard(dashboardId) {
@@ -1771,6 +2008,10 @@
       
       if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
+        if (file.type.startsWith('image/') || /\.(png|jpg|jpeg|gif|png)$/i.test(file.name)) {
+          alert("Only text-based files (.txt, .csv, .json, .md) are supported. Images cannot be uploaded as text context.");
+          return;
+        }
         try {
           fileContent = await readFileAsText(file);
         } catch (e) {
@@ -1800,6 +2041,17 @@
         reader.onerror = (error) => reject(error);
         reader.readAsText(file);
       });
+    }
+
+    function openLookmlModal(title, code) {
+      document.getElementById('lookmlModalTitle').innerText = title;
+      document.getElementById('lookmlModalCode').innerText = code;
+      document.getElementById('lookmlModal').style.display = 'flex';
+    }
+
+    function closeLookmlModal() {
+      document.getElementById('lookmlModal').style.display = 'none';
+      document.getElementById('lookmlModalCode').innerText = '';
     }
 
     // Load default dashboard on startup
