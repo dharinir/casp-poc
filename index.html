@@ -2,7 +2,7 @@
 <html class="light" lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Sales Command - Regional VP Dashboard</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"/>
@@ -103,43 +103,12 @@
   <style>
     body {
       -webkit-tap-highlight-color: transparent;
-      background-color: #f1f3f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      background-color: #f7fafd;
       margin: 0;
-    }
-    /* Mobile Device Mockup Frame */
-    .phone-frame {
-      width: 390px;
-      height: 844px;
-      background-color: #ffffff;
-      border: 12px solid #202124;
-      border-radius: 40px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-      position: relative;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .phone-notch {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 150px;
-      height: 25px;
-      background-color: #202124;
-      border-bottom-left-radius: 20px;
-      border-bottom-right-radius: 20px;
-      z-index: 100;
-    }
-    .bento-card {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .bento-card:active {
-      transform: scale(0.98);
     }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
@@ -148,18 +117,21 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-    /* Stepper Spinner */
     .spinner {
       border: 2px solid #dadce0;
       border-top: 2px solid #1a73e8;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+    .rotating {
+      animation: spin 1.5s linear infinite;
+      display: inline-block;
     }
     .chat-bubble-agent {
       background-color: #f1f3f4;
@@ -176,280 +148,289 @@
 </head>
 <body class="font-body-md text-on-surface">
 
-  <!-- Main Mobile Shell Container -->
-  <div class="phone-frame">
-    <div class="phone-notch"></div>
+  <!-- Desktop App Container -->
+  <div class="flex h-screen w-screen overflow-hidden bg-background">
     
-    <!-- DASHBOARD VIEW -->
-    <div id="dashboardView" class="flex flex-col h-full w-full">
-      <!-- Top AppBar -->
-      <header class="bg-white/80 backdrop-blur-md pt-7 pb-2 px-margin-mobile border-b border-outline-variant flex justify-between items-center z-40 shrink-0">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary overflow-hidden border border-outline-variant">
-            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ1r0qdSSn-CjLTEdT5QatbJ_A9EvuloLW15ed0REDVm7pXgRvGH2hQk2mp30TmCWeMRjlnTek-cuXXsRYDO7-rvZdArX9hkeq6sQrIWDAOoRFRJchLbxCHhxH-GrOaABbFORP7DkQtrNwW5qaaovd-6zUoEIkP3rrCyCJajCznQ6AXmdpKUyPweAx_ucuyikISuU2wM7Q1_Yqp8WoeS9iqMtq9AoFIUKFxAaI_PvB-djWjLvJbQi4eEPtst1qb1Z44UgrcdLqLg"/>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">EXECUTIVE PROFILE</span>
-            <span class="text-title-sm font-bold text-primary">Sales Command</span>
-          </div>
-        </div>
-        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors duration-200">
-          <span class="material-icons text-primary" style="font-size: 20px;">settings</span>
-        </button>
-      </header>
-
-      <!-- Scrollable Dashboard Content -->
-      <div class="flex-grow overflow-y-auto px-margin-mobile pt-4 pb-20 no-scrollbar">
-        <!-- Personalized Greeting -->
-        <section class="mb-5">
-          <h1 class="text-headline-md font-bold text-on-surface leading-tight">Welcome back, Jim</h1>
-          <div class="flex items-center gap-1.5 text-on-surface-variant mt-1">
-            <span class="material-icons text-primary" style="font-size: 16px;">location_on</span>
-            <span class="text-body-sm">Sales VP, California Region</span>
-          </div>
-        </section>
-
-        <!-- Summary Cards Grid -->
-        <div class="grid grid-cols-2 gap-sm mb-5">
-          <div class="bento-card bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-between h-28">
-            <div>
-              <span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">CA STORES</span>
-              <div class="mt-base text-headline-md font-bold text-primary leading-tight">12 Active</div>
-            </div>
-            <div class="flex items-center gap-1">
-              <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-              <span class="text-body-sm text-on-surface-variant">All online</span>
-            </div>
-          </div>
-          
-          <div class="bento-card bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-between h-28">
-            <div>
-              <span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">ALERTS</span>
-              <div class="mt-base text-headline-md font-bold text-error leading-tight">3 Alerting</div>
-            </div>
-            <div class="flex items-center gap-1">
-              <span class="material-icons text-error" style="font-size: 12px;">warning</span>
-              <span class="text-body-sm text-error font-medium">Critical levels</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Alerts Section -->
-        <section class="mb-5">
-          <div class="flex items-center justify-between mb-sm">
-            <h2 class="text-title-sm font-bold text-on-surface">Active Store Alerts</h2>
-            <span class="text-[10px] font-bold text-primary tracking-wider uppercase cursor-pointer">VIEW ALL</span>
-          </div>
-          
-          <div class="space-y-sm">
-            <!-- Alert Item 1 -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
-              <div class="flex justify-between items-start">
-                <div>
-                  <h3 class="font-bold text-on-surface text-body-md">Bryceburgh, CA</h3>
-                  <p class="text-body-sm text-on-surface-variant mt-0.5">SKU-001 (Shoes) stockout detected</p>
-                </div>
-                <span class="px-2 py-0.5 bg-error/10 text-error text-[10px] font-bold tracking-wider rounded uppercase">HIGH</span>
-              </div>
-              <div class="mt-3">
-                <button onclick="startInvestigation('SKU-001', 'STR-001', 'Bryceburgh, CA')" class="w-full py-1.5 border border-primary text-primary font-bold text-body-sm rounded-lg hover:bg-primary-fixed hover:text-primary transition-all duration-200">
-                  Investigate Root Cause
-                </button>
-              </div>
-            </div>
-
-            <!-- Alert Item 2 -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
-              <div class="flex justify-between items-start">
-                <div>
-                  <h3 class="font-bold text-on-surface text-body-md">East Dustin, CA</h3>
-                  <p class="text-body-sm text-on-surface-variant mt-0.5">SKU-001 (Shoes) stockout detected</p>
-                </div>
-                <span class="px-2 py-0.5 bg-error/10 text-error text-[10px] font-bold tracking-wider rounded uppercase">HIGH</span>
-              </div>
-              <div class="mt-3">
-                <button onclick="startInvestigation('SKU-001', 'STR-002', 'East Dustin, CA')" class="w-full py-1.5 border border-primary text-primary font-bold text-body-sm rounded-lg hover:bg-primary-fixed hover:text-primary transition-all duration-200">
-                  Investigate Root Cause
-                </button>
-              </div>
-            </div>
-
-            <!-- Alert Item 3 -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
-              <div class="flex justify-between items-start">
-                <div>
-                  <h3 class="font-bold text-on-surface text-body-md">San Jose, CA</h3>
-                  <p class="text-body-sm text-on-surface-variant mt-0.5">SKU-002 (Apparel) low inventory warning</p>
-                </div>
-                <span class="px-2 py-0.5 bg-yellow-600/10 text-yellow-600 text-[10px] font-bold tracking-wider rounded uppercase">MEDIUM</span>
-              </div>
-              <div class="mt-3">
-                <button onclick="startInvestigation('SKU-002', 'STR-003', 'San Jose, CA')" class="w-full py-1.5 border border-primary text-primary font-bold text-body-sm rounded-lg hover:bg-primary-fixed hover:text-primary transition-all duration-200">
-                  Investigate Root Cause
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+    <!-- 1. LEFT SIDEBAR MENU -->
+    <aside class="w-16 bg-white border-r border-outline-variant flex flex-col items-center py-4 gap-4 shrink-0">
+      <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary overflow-hidden border border-outline-variant">
+        <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ1r0qdSSn-CjLTEdT5QatbJ_A9EvuloLW15ed0REDVm7pXgRvGH2hQk2mp30TmCWeMRjlnTek-cuXXsRYDO7-rvZdArX9hkeq6sQrIWDAOoRFRJchLbxCHhxH-GrOaABbFORP7DkQtrNwW5qaaovd-6zUoEIkP3rrCyCJajCznQ6AXmdpKUyPweAx_ucuyikISuU2wM7Q1_Yqp8WoeS9iqMtq9AoFIUKFxAaI_PvB-djWjLvJbQi4eEPtst1qb1Z44UgrcdLqLg"/>
       </div>
-
-      <!-- Bottom Nav Bar -->
-      <nav class="absolute bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 bg-white border-t border-outline-variant pb-safe shrink-0">
-        <div class="flex flex-col items-center justify-center text-primary cursor-pointer">
+      <nav class="flex flex-col gap-2 w-full px-2 mt-4">
+        <button onclick="closeInvestigation()" class="flex flex-col items-center justify-center py-3 rounded-xl text-primary bg-primary-fixed/30 hover:bg-primary-fixed/20 transition-all duration-200">
           <span class="material-icons">dashboard</span>
-          <span class="text-[9px] font-bold tracking-wider uppercase">Dashboard</span>
-        </div>
-        <div class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 cursor-pointer">
+          <span class="text-[9px] font-bold mt-1 tracking-wider uppercase">Dash</span>
+        </button>
+        <button class="flex flex-col items-center justify-center py-3 rounded-xl text-on-surface-variant/60 hover:bg-surface-container-low transition-all duration-200">
           <span class="material-icons">notifications</span>
-          <span class="text-[9px] font-bold tracking-wider uppercase">Alerts</span>
-        </div>
-        <div class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 cursor-pointer">
+          <span class="text-[9px] font-bold mt-1 tracking-wider uppercase">Alerts</span>
+        </button>
+        <button class="flex flex-col items-center justify-center py-3 rounded-xl text-on-surface-variant/60 hover:bg-surface-container-low transition-all duration-200">
           <span class="material-icons">trending_up</span>
-          <span class="text-[9px] font-bold tracking-wider uppercase">Pipeline</span>
-        </div>
+          <span class="text-[9px] font-bold mt-1 tracking-wider uppercase">Pipeline</span>
+        </button>
       </nav>
-    </div>
+    </aside>
 
-    <!-- INVESTIGATION VIEW (Initially Hidden) -->
-    <div id="investigationView" class="hidden flex-col h-full w-full bg-slate-50">
-      <!-- Top Navigation -->
-      <header class="bg-white pt-7 pb-2 px-margin-mobile border-b border-outline-variant flex justify-between items-center shrink-0">
-        <button onclick="closeInvestigation()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors duration-200">
-          <span class="material-icons text-on-surface-variant">arrow_back</span>
-        </button>
-        <span class="text-title-sm font-bold text-on-surface">RCA Investigation</span>
-        <button onclick="closeInvestigation()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors duration-200">
-          <span class="material-icons text-on-surface-variant">close</span>
-        </button>
-      </header>
-
-      <!-- Investigation Content Body -->
-      <div class="flex-grow overflow-y-auto px-margin-mobile pt-4 pb-24 no-scrollbar flex flex-col gap-4">
-        
-        <!-- Target Alert Card -->
-        <div class="bg-error-container/20 border border-error/10 p-md rounded-xl flex items-start gap-3 shrink-0">
-          <span class="material-icons text-error mt-0.5">warning</span>
-          <div>
-            <h4 class="font-bold text-on-error-container text-body-sm leading-none">RCA Triggered</h4>
-            <p id="investTargetDesc" class="text-body-sm text-on-error-container/90 mt-1"></p>
+    <!-- 2. MAIN CONTAINER -->
+    <div class="flex-grow flex flex-col overflow-hidden h-full">
+      
+      <!-- Top AppBar Header -->
+      <header class="h-16 bg-white border-b border-outline-variant flex justify-between items-center px-lg shrink-0">
+        <div class="flex items-center gap-4">
+          <button id="headerBackBtn" onclick="closeInvestigation()" class="hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors duration-200">
+            <span class="material-icons text-on-surface-variant">arrow_back</span>
+          </button>
+          <div class="flex flex-col">
+            <span id="headerSubtitle" class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">EXECUTIVE PROFILE - REGIONAL VP</span>
+            <span id="headerTitle" class="text-title-sm font-bold text-primary">Sales Command</span>
           </div>
         </div>
-
-        <!-- Active Stepper and Terminal (Shown during generation) -->
-        <div id="loadingStatusContainer" class="flex flex-col gap-4">
-          <!-- Stepper -->
-          <div class="bg-white border border-outline-variant rounded-xl p-md flex flex-col gap-3">
-            <h5 class="text-body-sm font-bold text-on-surface border-b border-outline-variant pb-2 leading-none">Execution Flow</h5>
-            <div class="space-y-3 relative pl-3">
-              <div class="absolute left-1 top-1 bottom-1 w-[1px] bg-outline-variant"></div>
-              
-              <!-- Step 1 -->
-              <div id="step-1" class="flex items-center gap-3 relative">
-                <span id="step-1-icon" class="material-icons text-gray-300 text-[16px]">pending</span>
-                <span class="text-body-sm text-on-surface-variant">Gathering Looker Context...</span>
-              </div>
-              <!-- Step 2 -->
-              <div id="step-2" class="flex items-center gap-3 relative">
-                <span id="step-2-icon" class="material-icons text-gray-300 text-[16px]">pending</span>
-                <span class="text-body-sm text-on-surface-variant">Traversing BigQuery Graph...</span>
-              </div>
-              <!-- Step 3 -->
-              <div id="step-3" class="flex items-center gap-3 relative">
-                <span id="step-3-icon" class="material-icons text-gray-300 text-[16px]">pending</span>
-                <span class="text-body-sm text-on-surface-variant">Inspecting Catalog Schemas...</span>
-              </div>
-              <!-- Step 4 -->
-              <div id="step-4" class="flex items-center gap-3 relative">
-                <span id="step-4-icon" class="material-icons text-gray-300 text-[16px]">pending</span>
-                <span class="text-body-sm text-on-surface-variant">Executing Validation SQL...</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Live Analysis Log -->
-          <div class="bg-[#202124] rounded-xl overflow-hidden shadow-md flex flex-col h-44 shrink-0">
-            <div class="px-md py-1.5 bg-[#303134] flex justify-between items-center border-b border-[#3c4043]">
-              <span class="text-[9px] font-bold text-white/50 tracking-wider">LIVE LOG TERMINAL</span>
-              <div class="flex gap-1">
-                <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-              </div>
-            </div>
-            <div id="terminalContent" class="flex-grow p-3 font-mono text-[10px] text-green-400 overflow-y-auto space-y-1 select-all">
-              <!-- Logs appended dynamically -->
-            </div>
-          </div>
-        </div>
-
-        <!-- FINDINGS VIEW (Shown after done) -->
-        <div id="findingsContainer" class="hidden flex-col gap-4">
-          <!-- Root Cause Card -->
-          <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-            <div class="bg-primary/5 px-md py-2 border-b border-outline-variant flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="material-icons text-primary" style="font-size: 16px;">verified</span>
-                <h4 class="text-body-sm font-bold text-primary">Analysis Complete</h4>
-              </div>
-              <span class="text-[9px] font-bold text-on-surface-variant">JUST NOW</span>
-            </div>
-            <div class="p-md space-y-3">
-              <div>
-                <span class="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider block">Primary Root Cause</span>
-                <p id="findingsRootCause" class="text-body-sm text-on-surface mt-0.5 leading-relaxed"></p>
-              </div>
-              
-              <!-- Evidence SQL -->
-              <div class="border border-outline-variant rounded-lg overflow-hidden bg-slate-50">
-                <button onclick="toggleEvidenceSql()" class="w-full flex items-center justify-between p-2 hover:bg-slate-100 transition-colors">
-                  <div class="flex items-center gap-2">
-                    <span class="material-icons text-on-surface-variant" style="font-size: 16px;">terminal</span>
-                    <span class="text-body-sm font-bold text-on-surface">Technical Evidence</span>
-                  </div>
-                  <span id="evidenceChevron" class="material-icons text-on-surface-variant" style="font-size: 16px;">expand_more</span>
-                </button>
-                <div id="evidenceSqlBlock" class="hidden p-2 border-t border-outline-variant bg-[#202124]">
-                  <pre id="evidenceSql" class="text-blue-300 font-mono text-[10px] overflow-x-auto leading-relaxed select-all"></pre>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Proactive Actions Taken -->
-          <div class="bg-white border border-outline-variant rounded-xl p-md shadow-sm">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="material-icons text-green-600" style="font-size: 18px;">offline_pin</span>
-              <h5 class="text-body-sm font-bold text-on-surface">Proactive Actions Taken</h5>
-            </div>
-            <p id="findingsActions" class="text-body-sm text-on-surface-variant leading-relaxed"></p>
-          </div>
-
-          <!-- Proposed Solution -->
-          <div class="bg-white border border-outline-variant rounded-xl p-md shadow-sm">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="material-icons text-primary" style="font-size: 18px;">lightbulb</span>
-              <h5 class="text-body-sm font-bold text-on-surface">Proposed Solution</h5>
-            </div>
-            <p id="findingsSolution" class="text-body-sm text-on-surface-variant leading-relaxed"></p>
-          </div>
-        </div>
-
-        <!-- Chat Conversation (Messages are rendered here when interactive questions are active) -->
-        <div id="chatLog" class="hidden flex-col gap-2 overflow-y-auto">
-          <!-- Dynamically populated bubble messages -->
-        </div>
-
-      </div>
-
-      <!-- Sticky Mobile Bottom Chat Input -->
-      <div id="chatInputArea" class="hidden absolute bottom-0 left-0 w-full bg-white border-t border-outline-variant px-margin-mobile py-2.5 z-50 shrink-0">
-        <div class="relative flex items-center w-full">
-          <input id="chatInput" onkeypress="handleKeyPress(event)" class="w-full h-10 bg-slate-100 rounded-full pl-4 pr-12 border-transparent focus:border-primary focus:ring-0 text-body-sm" placeholder="Ask Follow-up Question..." type="text"/>
-          <button id="sendBtn" onclick="submitTextResponse()" class="absolute right-1 w-8 h-8 bg-primary text-on-primary rounded-full flex items-center justify-center hover:brightness-115 active:scale-95 transition-transform duration-150">
-            <span class="material-icons" style="font-size: 16px;">arrow_upward</span>
+        <div class="flex items-center gap-4">
+          <span class="text-body-sm font-medium text-on-surface-variant">Jim (California Region)</span>
+          <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors duration-200">
+            <span class="material-icons text-primary">settings</span>
           </button>
         </div>
-      </div>
+      </header>
+
+      <!-- VIEW BODY PANEL -->
+      <main class="flex-grow overflow-hidden relative">
+        
+        <!-- DASHBOARD LANDING PAGE VIEW -->
+        <div id="dashboardView" class="absolute inset-0 flex flex-col overflow-y-auto px-lg py-lg gap-lg">
+          <!-- Personalized Greeting -->
+          <section>
+            <h1 class="text-headline-lg font-bold text-on-surface leading-tight">Welcome back, Jim</h1>
+            <div class="flex items-center gap-2 text-on-surface-variant mt-1">
+              <span class="material-icons text-primary" style="font-size: 18px;">location_on</span>
+              <span class="text-body-md">Sales VP, California Region</span>
+            </div>
+          </section>
+
+          <!-- Summary Bento Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-md shrink-0">
+            <div class="bg-surface border border-outline-variant rounded-xl p-lg flex flex-col justify-between h-32 shadow-sm">
+              <div>
+                <span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">CA STORES</span>
+                <div class="mt-1 text-headline-md font-bold text-primary leading-tight">12 Active Stores</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                <span class="text-body-sm text-on-surface-variant">All stores online</span>
+              </div>
+            </div>
+            
+            <div class="bg-surface border border-outline-variant rounded-xl p-lg flex flex-col justify-between h-32 shadow-sm">
+              <div>
+                <span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">CRITICAL ALERTS</span>
+                <div class="mt-1 text-headline-md font-bold text-error leading-tight">3 Stores Alerting</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="material-icons text-error" style="font-size: 14px;">warning</span>
+                <span class="text-body-sm text-error font-medium">Immediate action required</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Store Alerts Section -->
+          <section class="flex flex-col gap-md">
+            <div class="flex items-center justify-between border-b border-outline-variant pb-2">
+              <h2 class="text-title-sm font-bold text-on-surface">Active Store Stockout Alerts</h2>
+              <button class="text-[11px] font-bold text-primary tracking-wider uppercase hover:underline">VIEW ALL STORES</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+              <!-- Alert Card 1 -->
+              <div class="bg-surface border border-outline-variant rounded-xl p-lg shadow-sm flex flex-col justify-between h-48">
+                <div>
+                  <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-on-surface text-title-sm">Bryceburgh, CA</h3>
+                    <span class="px-2 py-0.5 bg-error/10 text-error text-[10px] font-bold tracking-wider rounded uppercase">HIGH PRIORITY</span>
+                  </div>
+                  <p class="text-body-md text-on-surface-variant mt-2">SKU-001 (Pink Shoes) stockout detected. Store inventory has depleted to 0.</p>
+                </div>
+                <button onclick="triggerRCAWorkflow('SKU-001', 'STR-001', 'Bryceburgh, CA')" class="w-full py-2 bg-primary text-on-primary font-bold text-body-sm rounded-lg hover:brightness-110 active:scale-98 transition-all duration-200">
+                  Investigate Root Cause
+                </button>
+              </div>
+
+              <!-- Alert Card 2 -->
+              <div class="bg-surface border border-outline-variant rounded-xl p-lg shadow-sm flex flex-col justify-between h-48">
+                <div>
+                  <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-on-surface text-title-sm">East Dustin, CA</h3>
+                    <span class="px-2 py-0.5 bg-error/10 text-error text-[10px] font-bold tracking-wider rounded uppercase">HIGH PRIORITY</span>
+                  </div>
+                  <p class="text-body-md text-on-surface-variant mt-2">SKU-001 (Pink Shoes) stockout detected. Store inventory has depleted to 0.</p>
+                </div>
+                <button onclick="triggerRCAWorkflow('SKU-001', 'STR-002', 'East Dustin, CA')" class="w-full py-2 bg-primary text-on-primary font-bold text-body-sm rounded-lg hover:brightness-110 active:scale-98 transition-all duration-200">
+                  Investigate Root Cause
+                </button>
+              </div>
+
+              <!-- Alert Card 3 -->
+              <div class="bg-surface border border-outline-variant rounded-xl p-lg shadow-sm flex flex-col justify-between h-48">
+                <div>
+                  <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-on-surface text-title-sm">San Jose, CA</h3>
+                    <span class="px-2 py-0.5 bg-yellow-600/10 text-yellow-600 text-[10px] font-bold tracking-wider rounded uppercase">MEDIUM PRIORITY</span>
+                  </div>
+                  <p class="text-body-md text-on-surface-variant mt-2">SKU-002 (Apparel) low inventory warning. Safety stock margin is below 10%.</p>
+                </div>
+                <button onclick="triggerRCAWorkflow('SKU-002', 'STR-003', 'San Jose, CA')" class="w-full py-2 bg-primary text-on-primary font-bold text-body-sm rounded-lg hover:brightness-110 active:scale-98 transition-all duration-200">
+                  Investigate Root Cause
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- INVESTIGATION PANEL VIEW -->
+        <div id="investigationView" class="hidden absolute inset-0 flex h-full w-full bg-slate-50">
+          
+          <!-- Left Column Pane: Chat Conversation logs -->
+          <div class="w-[450px] lg:w-[500px] border-r border-outline-variant flex flex-col h-full bg-white shrink-0">
+            <div class="bg-surface px-lg py-4 border-b border-outline-variant flex items-center justify-between shrink-0">
+              <div class="flex items-center gap-2">
+                <span class="material-icons text-primary">chat_bubble</span>
+                <span class="text-title-sm font-bold text-on-surface">RCA Assistant</span>
+              </div>
+            </div>
+
+            <!-- Messages list -->
+            <div id="chatLog" class="flex-grow overflow-y-auto p-lg flex flex-col gap-md">
+              <!-- Dynamically populated bubble messages -->
+            </div>
+
+            <!-- Sticky Bottom Input -->
+            <div id="chatInputArea" class="hidden p-lg bg-slate-50 border-t border-outline-variant shrink-0">
+              <div class="relative flex items-center w-full">
+                <input id="chatInput" onkeypress="handleKeyPress(event)" class="w-full h-11 bg-white rounded-full pl-4 pr-12 border-outline-variant focus:border-primary focus:ring-0 text-body-md shadow-sm" placeholder="Ask follow-up question..." type="text"/>
+                <button id="sendBtn" onclick="submitTextResponse()" class="absolute right-1.5 w-8 h-8 bg-primary text-on-primary rounded-full flex items-center justify-center hover:brightness-115 active:scale-95 transition-transform duration-150">
+                  <span class="material-icons" style="font-size: 16px;">arrow_upward</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column Pane: Status Stepper, Terminal logs, Findings Card -->
+          <div class="flex-grow flex flex-col h-full overflow-y-auto p-lg gap-lg">
+            
+            <!-- Anomaly Target Card -->
+            <div class="bg-error-container/20 border border-error/10 p-lg rounded-xl flex items-start gap-4 shrink-0">
+              <span class="material-icons text-error mt-0.5">warning</span>
+              <div>
+                <h4 class="font-bold text-on-error-container text-title-sm leading-none">RCA Triggered</h4>
+                <p id="investTargetDesc" class="text-body-md text-on-error-container/90 mt-2"></p>
+              </div>
+            </div>
+
+            <!-- Loading flow and Stepper / Terminal -->
+            <div id="loadingStatusContainer" class="flex flex-col gap-lg flex-grow">
+              <!-- Horizontal Execution Flow Stepper -->
+              <div class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
+                <h5 class="text-title-sm font-bold text-on-surface border-b border-outline-variant pb-3 leading-none mb-4">Execution Flow</h5>
+                <div class="flex justify-between items-center relative py-2">
+                  <div class="absolute left-4 right-4 top-1/2 h-[1px] bg-outline-variant -translate-y-1/2 -z-10"></div>
+                  
+                  <div id="step-1" class="flex flex-col items-center gap-2 bg-white px-2">
+                    <span id="step-1-icon" class="material-icons text-gray-300 text-[20px] bg-white rounded-full">pending</span>
+                    <span class="text-body-sm text-on-surface-variant font-medium">Gathering Context</span>
+                  </div>
+                  
+                  <div id="step-2" class="flex flex-col items-center gap-2 bg-white px-2">
+                    <span id="step-2-icon" class="material-icons text-gray-300 text-[20px] bg-white rounded-full">pending</span>
+                    <span class="text-body-sm text-on-surface-variant font-medium">Traversing Graph</span>
+                  </div>
+                  
+                  <div id="step-3" class="flex flex-col items-center gap-2 bg-white px-2">
+                    <span id="step-3-icon" class="material-icons text-gray-300 text-[20px] bg-white rounded-full">pending</span>
+                    <span class="text-body-sm text-on-surface-variant font-medium">Inspecting Schemas</span>
+                  </div>
+                  
+                  <div id="step-4" class="flex flex-col items-center gap-2 bg-white px-2">
+                    <span id="step-4-icon" class="material-icons text-gray-300 text-[20px] bg-white rounded-full">pending</span>
+                    <span class="text-body-sm text-on-surface-variant font-medium">Executing Validation</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Terminal Log console -->
+              <div class="bg-[#202124] rounded-xl overflow-hidden shadow-lg flex flex-col h-80 shrink-0">
+                <div class="px-lg py-2 bg-[#303134] flex justify-between items-center border-b border-[#3c4043]">
+                  <span class="text-[10px] font-bold text-white/50 tracking-wider">LIVE LOG TERMINAL</span>
+                  <div class="flex gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                  </div>
+                </div>
+                <div id="terminalContent" class="flex-grow p-lg font-mono text-body-sm text-green-400 overflow-y-auto space-y-1 select-all">
+                  <!-- Dynamic Logs -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Analysis Findings Card -->
+            <div id="findingsContainer" class="hidden flex flex-col gap-lg">
+              
+              <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+                <div class="bg-primary/5 px-lg py-3 border-b border-outline-variant flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <span class="material-icons text-primary">verified</span>
+                    <h4 class="text-title-sm font-bold text-primary">RCA Findings Summary</h4>
+                  </div>
+                  <span class="text-[10px] font-bold text-on-surface-variant uppercase">COMPLETED</span>
+                </div>
+                
+                <div class="p-lg space-y-4">
+                  <div>
+                    <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Primary Root Cause</span>
+                    <p id="findingsRootCause" class="text-body-md text-on-surface mt-1.5 leading-relaxed"></p>
+                  </div>
+
+                  <!-- Technical Evidence -->
+                  <div class="border border-outline-variant rounded-lg overflow-hidden bg-slate-50">
+                    <button onclick="toggleEvidenceSql()" class="w-full flex items-center justify-between px-lg py-3 hover:bg-slate-100 transition-colors">
+                      <div class="flex items-center gap-2">
+                        <span class="material-icons text-on-surface-variant">terminal</span>
+                        <span class="text-body-md font-bold text-on-surface">Technical Evidence</span>
+                      </div>
+                      <span id="evidenceChevron" class="material-icons text-on-surface-variant">expand_more</span>
+                    </button>
+                    <div id="evidenceSqlBlock" class="hidden p-lg border-t border-outline-variant bg-[#202124]">
+                      <pre id="evidenceSql" class="text-blue-300 font-mono text-body-sm overflow-x-auto leading-relaxed select-all"></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions Taken -->
+              <div class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="material-icons text-green-600">offline_pin</span>
+                  <h5 class="text-title-sm font-bold text-on-surface">Proactive Actions Taken</h5>
+                </div>
+                <p id="findingsActions" class="text-body-md text-on-surface-variant leading-relaxed"></p>
+              </div>
+
+              <!-- Proposed Solution -->
+              <div class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm border-dashed border-primary bg-primary/5">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="material-icons text-primary">lightbulb</span>
+                  <h5 class="text-title-sm font-bold text-on-surface">Proposed Solution</h5>
+                </div>
+                <p id="findingsSolution" class="text-body-md text-on-surface-variant leading-relaxed"></p>
+              </div>
+              
+            </div>
+            
+          </div>
+
+        </div>
+
+      </main>
     </div>
   </div>
 
@@ -458,29 +439,162 @@
     let currentSessionId = "";
     let eventSource = null;
     let activeInteractionQuestions = [];
+    let pendingRCAData = null;
 
-    function startInvestigation(sku, storeId, storeName) {
+    function triggerRCAWorkflow(sku, storeId, storeName) {
+      pendingRCAData = { sku, storeId, storeName };
+      openContextModal();
+    }
+
+    function openContextModal() {
+      document.getElementById('rcaContextModal').classList.remove('hidden');
+      document.getElementById('contextText').value = '';
+      document.getElementById('contextFile').value = '';
+    }
+
+    function closeContextModal() {
+      document.getElementById('rcaContextModal').classList.add('hidden');
+      pendingRCAData = null;
+    }
+
+    function submitRCAWithoutContext() {
+      if (!pendingRCAData) return;
+      const { sku, storeId, storeName } = pendingRCAData;
+      closeContextModal();
+      startInvestigation(sku, storeId, storeName, "");
+    }
+
+    async function submitRCAWithContext() {
+      if (!pendingRCAData) return;
+      const { sku, storeId, storeName } = pendingRCAData;
+      
+      const contextText = document.getElementById('contextText').value.trim();
+      const fileInput = document.getElementById('contextFile');
+      let fileContent = "";
+      
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.type.startsWith('image/') || /\.(png|jpg|jpeg|gif|webp)$/i.test(file.name)) {
+          alert("Only text-based files (.txt, .csv, .json, .md) are supported. Images cannot be uploaded as text context.");
+          return;
+        }
+        try {
+          fileContent = await readFileAsText(file);
+        } catch (e) {
+          alert("Failed to read uploaded file: " + e.message);
+          return;
+        }
+      }
+      
+      let additionalContext = "";
+      if (contextText) {
+        additionalContext += `User provided context/link: ${contextText}\n`;
+      }
+      if (fileContent) {
+        additionalContext += `Uploaded file content:\n${fileContent}\n`;
+      }
+      
+      closeContextModal();
+      startInvestigation(sku, storeId, storeName, additionalContext);
+    }
+
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => resolve(event.target.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsText(file);
+      });
+    }
+
+    const statusPhrases = [
+      "Formulating RCA Reasoning...",
+      "Searching Knowledge Catalog for existing Looker assets...",
+      "Discovering base BigQuery tables for Dashboard...",
+      "Traversing BigQuery Graph for related operational tables...",
+      "Inspecting metadata and data lineage in Knowledge Catalog...",
+      "Executing SQL to validate shipment reasoning..."
+    ];
+
+    function getLatestStatus(text) {
+      let latestStatus = null;
+      let latestIndex = -1;
+      statusPhrases.forEach((phrase) => {
+        const idx = text.indexOf(phrase);
+        if (idx > latestIndex) {
+          latestIndex = idx;
+          latestStatus = phrase;
+        }
+      });
+      return latestStatus;
+    }
+
+    function updateLoaderStatus(text) {
+      const status = getLatestStatus(text);
+      if (status) {
+        const textSpan = document.getElementById('loadingMessageText');
+        if (textSpan) {
+          textSpan.innerText = status;
+        }
+      }
+    }
+
+    function appendLoadingMessage() {
+      const chatLog = document.getElementById('chatLog');
+      
+      // Remove existing if any
+      removeLoadingMessage();
+      
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'self-center text-center text-[11px] text-on-surface-variant/60 italic my-2 w-full';
+      msgDiv.id = 'loadingMessage';
+      msgDiv.innerHTML = `
+        <div class="flex items-center gap-2 justify-center">
+          <span class="material-icons rotating text-primary" style="font-size: 16px;">sync</span>
+          <span id="loadingMessageText">Agent is formulating reasoning...</span>
+        </div>
+      `;
+      chatLog.appendChild(msgDiv);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function removeLoadingMessage() {
+      const loadingMsg = document.getElementById('loadingMessage');
+      if (loadingMsg) {
+        loadingMsg.remove();
+      }
+    }
+
+    function startInvestigation(sku, storeId, storeName, additionalContext = "") {
       currentSessionId = "session_" + Date.now();
       const query = `Stockout alert for SKU ${sku} in Store ${storeId} (${storeName})`;
       
       // Update target alert card description
       document.getElementById('investTargetDesc').innerText = `${sku} Anomaly at ${storeName} (${storeId}).`;
 
-      // Reset UI elements
+      // Swap view states
       document.getElementById('dashboardView').classList.add('hidden');
       document.getElementById('investigationView').classList.remove('hidden');
+      
+      // Change header details
+      document.getElementById('headerBackBtn').classList.remove('hidden');
+      document.getElementById('headerTitle').innerText = "Root Cause Analysis (RCA)";
+      document.getElementById('headerSubtitle').innerText = "INVESTIGATION WORKSPACE";
+      
+      // Reset status screens
       document.getElementById('loadingStatusContainer').classList.remove('hidden');
       document.getElementById('findingsContainer').classList.add('hidden');
       document.getElementById('chatLog').classList.add('hidden');
       document.getElementById('chatInputArea').classList.add('hidden');
       document.getElementById('chatLog').innerHTML = "";
       document.getElementById('terminalContent').innerHTML = "";
+      appendLoadingMessage();
 
       // Reset Stepper
       resetStepper();
 
       // Submit API Query
-      initiateQuery(query);
+      initiateQuery(query, additionalContext);
     }
 
     function closeInvestigation() {
@@ -489,13 +603,18 @@
       }
       document.getElementById('investigationView').classList.add('hidden');
       document.getElementById('dashboardView').classList.remove('hidden');
+      
+      // Restore header details
+      document.getElementById('headerBackBtn').classList.add('hidden');
+      document.getElementById('headerTitle').innerText = "Sales Command";
+      document.getElementById('headerSubtitle').innerText = "EXECUTIVE PROFILE - REGIONAL VP";
     }
 
     function resetStepper() {
       for (let i = 1; i <= 4; i++) {
         const icon = document.getElementById(`step-${i}-icon`);
         icon.innerText = "pending";
-        icon.className = "material-icons text-gray-300 text-[16px]";
+        icon.className = "material-icons text-gray-300 text-[20px] bg-white rounded-full";
       }
     }
 
@@ -505,12 +624,12 @@
         icon.className = "spinner shrink-0";
         icon.innerText = "";
       } else if (status === 'complete') {
-        icon.className = "material-icons text-green-500 text-[16px] shrink-0";
+        icon.className = "material-icons text-green-500 text-[20px] bg-white rounded-full shrink-0";
         icon.innerText = "check_circle";
       }
     }
 
-    async function initiateQuery(query) {
+    async function initiateQuery(query, context = "") {
       appendTerminalLog("> INITIALIZING AGENT...", "info");
       updateStep(1, 'active');
 
@@ -522,7 +641,7 @@
           },
           body: JSON.stringify({
             query: query,
-            context: "",
+            context: context,
             session_id: currentSessionId
           })
         });
@@ -544,12 +663,14 @@
         const data = JSON.parse(event.data);
 
         if (data.type === 'interaction_required') {
+          removeLoadingMessage();
           handleInteraction(data);
           return;
         }
 
         if (data.status === 'error') {
           eventSource.close();
+          removeLoadingMessage();
           appendTerminalLog(`> AGENT ERROR: ${data.error}`, "error");
           return;
         }
@@ -562,17 +683,20 @@
         if (data.text) {
           appendTerminalLog(data.text);
           parseLogForStepper(data.text);
+          updateLoaderStatus(data.text);
         }
 
         if (data.status === 'done') {
           eventSource.close();
           completeAllSteps();
+          removeLoadingMessage();
           renderFinalReport(latestFinalOutput);
         }
       };
 
       eventSource.onerror = function() {
         eventSource.close();
+        removeLoadingMessage();
         appendTerminalLog("> SERVER DISCONNECTED.", "error");
       }
     }
@@ -724,6 +848,9 @@
       const chatInput = document.getElementById('chatInput');
       chatInput.disabled = true;
 
+      // Start loader spinner in chat
+      appendLoadingMessage();
+
       try {
         const res = await fetch('/api/interaction/resolve', {
           method: 'POST',
@@ -770,5 +897,45 @@
       }
     }
   </script>
+
+  <!-- RCA Context Modal -->
+  <div id="rcaContextModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-outline-variant shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+      <!-- Modal Header -->
+      <div class="px-lg py-4 border-b border-outline-variant flex justify-between items-center bg-slate-50">
+        <h3 class="text-title-sm font-bold text-on-surface">Run RCA - Add Additional Context</h3>
+        <button onclick="closeContextModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-on-surface-variant transition-colors">
+          <span class="material-icons" style="font-size: 20px;">close</span>
+        </button>
+      </div>
+      <!-- Modal Body -->
+      <div class="p-lg flex flex-col gap-4">
+        <p class="text-body-sm text-on-surface-variant leading-relaxed">
+          Optional: Provide additional local context (Description, URL, Drive link, or upload a document) to help the agent reason about the stockout.
+        </p>
+        
+        <!-- Text Area Context -->
+        <div class="flex flex-col gap-1.5">
+          <label for="contextText" class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Description, Web URL, or Drive Link</label>
+          <textarea id="contextText" rows="4" class="w-full p-3 border border-outline-variant rounded-xl text-body-md focus:border-primary focus:ring-0 resize-none bg-slate-50 focus:bg-white transition-colors" placeholder="Enter details, paste a URL or Drive link..."></textarea>
+        </div>
+        
+        <!-- File Input Context -->
+        <div class="flex flex-col gap-1.5">
+          <label for="contextFile" class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Upload Document (Text, CSV, JSON, MD)</label>
+          <input type="file" id="contextFile" accept=".txt,.csv,.json,.md" class="w-full text-body-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-body-sm file:font-semibold file:bg-primary-fixed file:text-primary hover:file:bg-primary-fixed/80 file:cursor-pointer"/>
+        </div>
+      </div>
+      <!-- Modal Footer -->
+      <div class="px-lg py-3 border-t border-outline-variant bg-slate-50 flex justify-end gap-3">
+        <button onclick="submitRCAWithoutContext()" class="px-4 py-2 border border-outline-variant text-on-surface-variant font-bold text-body-sm rounded-lg hover:bg-slate-100 transition-colors">
+          Skip / Run RCA
+        </button>
+        <button onclick="submitRCAWithContext()" class="px-4 py-2 bg-primary text-on-primary font-bold text-body-sm rounded-lg hover:brightness-110 active:scale-98 transition-all">
+          Run with Context
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
