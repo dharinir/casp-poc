@@ -525,11 +525,33 @@ if __name__ == "__main__":
       print(looker_list_dashboards())
     elif tool_name == "looker_get_dashboard":
       print(looker_get_dashboard(*args))
-    elif tool_name == "debug_sdk":
+    elif tool_name == "print_project_files":
       sdk = looker_sdk.init40(
           config_file=os.getenv("LOOKERSDK_INI", "looker.ini")
       )
-      print([m for m in dir(sdk) if "alert" in m.lower()])
+      projects = sdk.all_projects(fields="id,name")
+      print("Projects found in Looker:")
+      for p in projects:
+        print(f"Project ID: {p.id}, Name: {p.name}")
+      # Try using the first project or dharinir-lags-codelab
+      project_id = projects[0].id if projects else "dharinir-lags-codelab"
+      print(f"\nFetching files for project_id: {project_id}")
+      files = sdk.all_project_files(project_id=project_id)
+      for f in files:
+        print(f"File: {f.path} (type: {f.type})")
+        if f.type in ["model", "view"]:
+          try:
+            encoded_proj = sdk.encode_path_param(project_id)
+            content = sdk.get(
+                path=f"/projects/{encoded_proj}/file/content",
+                structure=str,
+                query_params={"file_path": f.path},
+            )
+            print(f"--- CONTENT FOR {f.path} ---")
+            print(content)
+            print("----------------------------\n")
+          except Exception as e:
+            print(f"Error reading file {f.path}: {e}")
     else:
       print(f"Unknown tool: {tool_name}")
   else:

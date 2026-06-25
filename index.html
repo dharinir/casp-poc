@@ -537,6 +537,7 @@
       }
 
       // Open event stream
+      let latestFinalOutput = null;
       eventSource = new EventSource(`/api/query/stream?session_id=${currentSessionId}`);
 
       eventSource.onmessage = function(event) {
@@ -553,6 +554,11 @@
           return;
         }
 
+        if (data.type === 'final_output') {
+          latestFinalOutput = data.text;
+          return;
+        }
+
         if (data.text) {
           appendTerminalLog(data.text);
           parseLogForStepper(data.text);
@@ -561,7 +567,7 @@
         if (data.status === 'done') {
           eventSource.close();
           completeAllSteps();
-          renderFinalReport(data.result);
+          renderFinalReport(latestFinalOutput);
         }
       };
 
