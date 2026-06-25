@@ -678,8 +678,12 @@
         options.forEach((opt) => {
           const btn = document.createElement('button');
           btn.className = "w-full py-1.5 px-3 bg-white hover:bg-primary-fixed border border-primary text-primary font-medium text-left rounded-lg text-body-sm transition-all duration-150";
-          btn.innerText = opt;
-          btn.onclick = () => selectChatOption(opt, optContainer);
+          
+          const optId = opt.id !== undefined ? opt.id : opt;
+          const optText = opt.text || opt;
+          
+          btn.innerText = optText;
+          btn.onclick = () => selectChatOption(optId, optText, optContainer);
           optContainer.appendChild(btn);
         });
         bubble.appendChild(optContainer);
@@ -689,7 +693,7 @@
       chatLog.scrollTop = chatLog.scrollHeight;
     }
 
-    function selectChatOption(selectedOption, optContainer) {
+    function selectChatOption(optionId, optionText, optContainer) {
       // Disable all options in that container
       optContainer.querySelectorAll('button').forEach((b) => {
         b.disabled = true;
@@ -698,12 +702,12 @@
       });
 
       // Append user message
-      appendChatMessage('user', selectedOption);
+      appendChatMessage('user', optionText);
 
       // Send to Backend
       const responses = [{
-        selected_option_ids: [],
-        write_in_response: selectedOption,
+        selected_option_ids: [optionId],
+        write_in_response: optionText,
         skipped: false
       }];
       submitInteractionResponse(responses);
