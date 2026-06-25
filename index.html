@@ -1,1586 +1,719 @@
 <!DOCTYPE html>
-<html>
+<html class="light" lang="en">
 <head>
-  <title>RCA Copilot - Findings & Proposal</title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <title>Sales Command - Regional VP Dashboard</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#1a73e8",
+            "background": "#f7fafd",
+            "on-primary": "#ffffff",
+            "inverse-surface": "#2d3134",
+            "secondary": "#005ac1",
+            "primary-fixed": "#d8e2ff",
+            "on-surface": "#181c1f",
+            "surface-bright": "#f7fafd",
+            "outline": "#727785",
+            "surface-container-high": "#e5e8ec",
+            "secondary-fixed": "#d8e2ff",
+            "inverse-on-surface": "#eef1f5",
+            "secondary-container": "#4d8efe",
+            "primary-fixed-dim": "#adc7ff",
+            "on-secondary": "#ffffff",
+            "tertiary-fixed-dim": "#6ddd81",
+            "surface-variant": "#e0e3e6",
+            "error-container": "#ffdad6",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "on-primary-container": "#ffffff",
+            "outline-variant": "#c1c6d6",
+            "on-secondary-fixed": "#001a41",
+            "surface": "#ffffff",
+            "surface-container": "#ebeef2",
+            "on-primary-fixed-variant": "#004493",
+            "on-background": "#181c1f",
+            "tertiary-container": "#008939",
+            "on-secondary-container": "#00285c",
+            "surface-dim": "#d7dade",
+            "surface-container-low": "#f1f4f7",
+            "primary-container": "#1a73e8",
+            "on-secondary-fixed-variant": "#004494",
+            "surface-tint": "#005bc0",
+            "on-tertiary": "#ffffff",
+            "tertiary-fixed": "#89fa9b",
+            "surface-container-highest": "#e0e3e6",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#002108",
+            "on-tertiary-container": "#ffffff",
+            "secondary-fixed-dim": "#adc6ff",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed": "#001a41",
+            "inverse-primary": "#adc7ff",
+            "tertiary": "#006d2c",
+            "on-tertiary-fixed-variant": "#005320",
+            "on-surface-variant": "#414754"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "xs": "4px",
+            "margin-mobile": "16px",
+            "margin-desktop": "32px",
+            "gutter": "16px",
+            "base": "4px",
+            "sm": "8px",
+            "md": "16px",
+            "xl": "40px",
+            "lg": "24px"
+          },
+          "fontFamily": {
+            "label-caps": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "body-sm": ["Inter"],
+            "title-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "code-block": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+            "title-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+            "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "code-block": ["13px", {"lineHeight": "20px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f8f9fa;
-      color: #3c4043;
-      display: flex;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-    }
-    
-    /* App Layout */
-    .app-container {
-      display: flex;
-      width: 100%;
-      height: 100%;
-    }
-    
-    /* Sidebar Styles */
-    .sidebar {
-      width: 70px;
-      background-color: #ffffff;
-      border-right: 1px solid #dadce0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 0;
-      gap: 20px;
-      flex-shrink: 0;
-    }
-    .sidebar-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      align-items: center;
-      width: 100%;
-    }
-    .menu-item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-      color: #5f6368;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-    .menu-item:hover {
+      -webkit-tap-highlight-color: transparent;
       background-color: #f1f3f4;
-      color: #202124;
-    }
-    .menu-item.active {
-      background-color: #e8f0fe;
-      color: #1a73e8;
-    }
-    .menu-item .material-icons {
-      font-size: 24px;
-    }
-    
-    /* Main Content Area */
-    .main-container {
-      flex-grow: 1;
       display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      height: 100%;
-    }
-    
-    /* Header Styles */
-    .header {
-      height: 56px;
-      border-bottom: 1px solid #dadce0;
-      display: flex;
+      justify-content: center;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
+      min-height: 100vh;
+      margin: 0;
+    }
+    /* Mobile Device Mockup Frame */
+    .phone-frame {
+      width: 390px;
+      height: 844px;
       background-color: #ffffff;
-      flex-shrink: 0;
-    }
-    .header-left {
+      border: 12px solid #202124;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
       display: flex;
-      align-items: center;
-      gap: 16px;
-      height: 100%;
+      flex-direction: column;
     }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 25px;
+      background-color: #202124;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      z-index: 100;
     }
-    .header-icon {
-      color: #5f6368;
-      cursor: pointer;
+    .bento-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .header-icon:hover {
-      color: #202124;
+    .bento-card:active {
+      transform: scale(0.98);
     }
-    .profile-img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background-color: #dadce0;
-      background-image: url('https://lh3.googleusercontent.com/a/default-user=s64-c');
-      background-size: cover;
-    }
-    
-    /* Content Body */
-    .content-body {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 24px 40px;
-      box-sizing: border-box;
-    }
-    
-    /* Tab Contents */
-    .tab-content {
+    .no-scrollbar::-webkit-scrollbar {
       display: none;
-      height: 100%;
     }
-    .tab-content.active {
-      display: flex;
-      flex-direction: column;
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
-    
-    /* Dashboard Tab Styles */
-    .dashboard-view {
-      background-color: white;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      padding: 24px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-    .dashboard-title {
-      font-size: 18px;
-      font-weight: 500;
-      margin-top: 0;
-      margin-bottom: 8px;
-      color: #202124;
-    }
-    .dashboard-desc {
-      font-size: 14px;
-      color: #5f6368;
-      margin-bottom: 24px;
-    }
-    .dashboard-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .dashboard-table th, .dashboard-table td {
-      border-bottom: 1px solid #dadce0;
-      padding: 12px 16px;
-      text-align: left;
-      font-size: 14px;
-    }
-    .dashboard-table th {
-      background-color: #f8f9fa;
-      font-weight: 500;
-      color: #5f6368;
-    }
-    .dashboard-table tr:hover {
-      background-color: #f8f9fa;
-    }
-    .stockout-badge {
-      background-color: #fce8e6;
-      color: #c5221f;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .btn-run-rca {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-    .btn-run-rca:hover {
-      background-color: #1557b0;
-    }
-    
-    /* Empty State / Initial State */
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #80868b;
-      gap: 16px;
-      padding: 40px;
-      text-align: center;
-    }
-    .empty-state .material-icons {
-      font-size: 48px;
-      color: #dadce0;
-    }
-    
-    /* Loading / Stepper State */
-    .loading-state {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px;
-      gap: 24px;
-    }
+    /* Stepper Spinner */
     .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #1a73e8;
+      border: 2px solid #dadce0;
+      border-top: 2px solid #1a73e8;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
+      width: 18px;
+      height: 18px;
+      animation: spin 0.8s linear infinite;
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    .stepper {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      gap: 16px;
-      width: 100%;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #dadce0;
-      box-sizing: border-box;
+    .chat-bubble-agent {
+      background-color: #f1f3f4;
+      color: #202124;
+      border-bottom-left-radius: 2px;
     }
-    .step {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #80868b;
-      font-size: 14px;
-    }
-    .step-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border: 2px solid #dadce0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    .step.active {
-      color: #1a73e8;
-      font-weight: 500;
-    }
-    .step.active .step-icon {
-      border-color: #1a73e8;
+    .chat-bubble-user {
       background-color: #e8f0fe;
       color: #1a73e8;
-    }
-    .step.completed {
-      color: #1e8e3e;
-    }
-    .step.completed .step-icon {
-      border-color: #1e8e3e;
-      background-color: #e6f4ea;
-      color: #1e8e3e;
-    }
-    
-    /* Chat Console Logs (Debugging thoughts) */
-    .console-logs {
-      margin-top: 24px;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      background-color: #ffffff;
-      padding: 16px;
-      max-height: 200px;
-      overflow-y: auto;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 12px;
-      display: none;
-    }
-    .log-entry { margin-bottom: 8px; }
-    .log-thought { color: #5f6368; }
-    .log-tool { color: #b06000; }
-    
-    /* RCA Report V2 (Mock replica) */
-    .rca-report-v2 {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-    .anomaly-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #c5221f;
-      background-color: #fce8e6;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 4px;
-      width: fit-content;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .anomaly-tag .material-icons {
-      font-size: 14px;
-    }
-    .report-header-v2 {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-    .report-title-v2 {
-      font-size: 24px;
-      font-weight: 500;
-      color: #202124;
-      margin: 0 0 6px 0;
-    }
-    .report-subtitle-v2 {
-      font-size: 13px;
-      color: #5f6368;
-      margin: 0;
-    }
-    .report-actions {
-      display: flex;
-      gap: 12px;
-    }
-    
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      border: 1px solid transparent;
-      box-sizing: border-box;
-      height: 36px;
-    }
-    .btn .material-icons {
-      font-size: 18px;
-    }
-    .btn-outline {
-      background-color: white;
-      border-color: #dadce0;
-      color: #1a73e8;
-    }
-    .btn-outline:hover {
-      background-color: #f8f9fa;
-      border-color: #cdd1d4;
-    }
-    .btn-filled {
-      background-color: #1a73e8;
-      color: white;
-    }
-    .btn-filled:hover {
-      background-color: #1557b0;
-    }
-    .btn-text {
-      background: none;
-      color: #1a73e8;
-      padding: 0 8px;
-      border: none;
-      height: auto;
-    }
-    .btn-text:hover {
-      background-color: #e8f0fe;
-    }
-    
-    /* Cards Layout */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-    }
-    .card {
-      background: white;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-sizing: border-box;
-      min-height: 240px;
-    }
-    .card-header-v2 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      color: #5f6368;
-    }
-    .card-title-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card-title-v2 {
-      font-size: 16px;
-      font-weight: 500;
-      color: #202124;
-    }
-    .icon-obs { color: #d93025; }
-    .icon-rc { color: #1e8e3e; }
-    .card-body-v2 {
-      font-size: 14px;
-      line-height: 1.5;
-      color: #3c4043;
-      flex-grow: 1;
-    }
-    .card-body-v2 p {
-      margin: 0;
-    }
-    .highlight-note {
-      background-color: #f8f9fa;
-      border-left: 4px solid #1a73e8;
-      padding: 12px 16px;
-      border-radius: 0 4px 4px 0;
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-    .card-footer-v2 {
-      border-top: 1px solid #f1f3f4;
-      padding-top: 16px;
-      margin-top: 16px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      color: #5f6368;
-    }
-    .duration-val {
-      color: #d93025;
-      font-weight: 700;
-    }
-    
-    /* Evidence Section */
-    .evidence-section {
-      background: white;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .evidence-header {
-      padding: 12px 24px;
-      border-bottom: 1px solid #dadce0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 500;
-      font-size: 14px;
-      color: #202124;
-    }
-    .evidence-title-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .sql-console {
-      background-color: #202124;
-      color: #f1f3f4;
-      padding: 20px 24px;
-      margin: 0;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      overflow-x: auto;
-    }
-    
-    /* Proposed Solution Section */
-    .proposed-solution {
-      border: 1px dashed #1a73e8;
-      background-color: #e8f0fe;
-      border-radius: 8px;
-      padding: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-sizing: border-box;
-    }
-    .solution-left {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      max-width: 70%;
-    }
-    .icon-wand-container {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background-color: #d2e3fc;
-      color: #1a73e8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .solution-text h3 {
-      font-size: 18px;
-      font-weight: 500;
-      margin: 0 0 4px 0;
-      color: #202124;
-    }
-    .solution-text p {
-      font-size: 14px;
-      line-height: 1.5;
-      margin: 0;
-      color: #3c4043;
-    }
-    .solution-right {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-    .solution-actions {
-      display: flex;
-      gap: 12px;
-    }
-    .model-graphic {
-      width: 100px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #1a73e8;
-      opacity: 0.6;
-    }
-    
-    /* Floating Chat bar for custom queries */
-    .custom-query-container {
-      margin-top: 32px;
-      display: flex;
-      gap: 12px;
-      background: white;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #dadce0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      align-items: center;
-    }
-    .custom-query-container input {
-      flex-grow: 1;
-      border: none;
-      outline: none;
-      font-size: 14px;
-      font-family: inherit;
-    }
-    
-    /* Interaction Card */
-    .interaction-card {
-      background: white;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .interaction-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #1a73e8;
-      font-size: 16px;
-      margin-bottom: 16px;
-      font-weight: 500;
-    }
-    .interaction-header .material-icons {
-      font-size: 20px;
-    }
-    .interaction-content {
-      font-size: 14px;
-      color: #3c4043;
-      margin-bottom: 20px;
-    }
-    .interaction-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      border-top: 1px solid #f1f3f4;
-      padding-top: 16px;
-    }
-    .interaction-question {
-      margin-bottom: 20px;
-    }
-    .interaction-question-title {
-      font-weight: 500;
-      font-size: 14px;
-      margin-bottom: 12px;
-      color: #202124;
-    }
-    .interaction-options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .interaction-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      font-size: 14px;
-      color: #3c4043;
-      padding: 6px 8px;
-      border-radius: 4px;
-      transition: background 0.15s;
-    }
-    .interaction-option:hover {
-      background: #f8f9fa;
-    }
-    .interaction-option input {
-      margin: 0;
-      cursor: pointer;
-    }
-    .interaction-text-input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #dadce0;
-      border-radius: 4px;
-      font-family: inherit;
-      font-size: 14px;
-      margin-top: 8px;
-      box-sizing: border-box;
-      resize: vertical;
-    }
-    
-    /* Chat Interface Styles */
-    .chat-interface {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      background: white;
-      overflow: hidden;
-      margin-bottom: 16px;
-      min-height: 350px;
-    }
-    .chat-messages {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .chat-input-area {
-      display: flex;
-      padding: 8px 12px;
-      gap: 8px;
-      background: #f1f3f4;
-      border-radius: 24px;
-      align-items: center;
-      margin: 16px;
-    }
-    .chat-input-area input {
-      flex-grow: 1;
-      border: none;
-      background: transparent;
-      padding: 8px 0;
-      font-family: inherit;
-      font-size: 14px;
-      outline: none;
-    }
-    .btn-send-chat {
-      background: #1a73e8;
-      color: white;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-send-chat:hover {
-      background: #1557b0;
-    }
-    .message {
-      max-width: 85%;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      line-height: 1.5;
-      word-break: break-word;
-      margin-bottom: 12px;
-    }
-    .message.agent {
-      background-color: #ffffff;
-      border: 1px solid #dadce0;
-      align-self: flex-start;
-      color: #202124;
-    }
-    .message.user {
-      background-color: #1a73e8;
+      border-bottom-right-radius: 2px;
       align-self: flex-end;
-      color: #ffffff;
     }
-    .message.alert {
-      background-color: #f1f3f4;
-      align-self: flex-start;
-      color: #202124;
-    }
-    .message.status {
-      background-color: transparent;
-      align-self: center;
-      color: #5f6368;
-      font-size: 11px;
-      font-style: italic;
-      padding: 4px 8px;
-      text-align: center;
-      width: 100%;
-    }
-    .chat-options {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 8px;
-      width: 100%;
-    }
-    .chat-option-btn {
-      background: white;
-      border: 1px solid #1a73e8;
-      color: #1a73e8;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      text-align: left;
-      transition: background 0.15s;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .chat-option-btn:hover {
-      background: #e8f0fe;
-    }
-    .chat-option-btn:disabled {
-      border-color: #dadce0;
-      color: #80868b;
-      background: #f8f9fa;
-      cursor: default;
-    }
-
-    /* Split Layout Styles */
-    .invest-split-layout {
-      display: flex;
-      gap: 24px;
-      height: 100%;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .invest-left-pane {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-width: 350px;
-      flex: 1;
-    }
-    .invest-right-pane {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      overflow-y: auto;
-      height: 100%;
-      padding-right: 8px;
-      border-left: 1px solid #dadce0;
-      padding-left: 24px;
-      flex: 1.2;
-    }
-
-    /* Primary Root Cause Card */
-    .root-cause-card {
-      background-color: #f4f6fe;
-      border-left: 5px solid #1a73e8;
-      border-radius: 4px;
-      padding: 16px;
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .root-cause-icon {
-      color: #1a73e8;
-      background: #e8f0fe;
-      padding: 8px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .root-cause-content h3 {
-      margin: 0 0 8px 0;
-      font-size: 14px;
-      color: #1a73e8;
-      font-weight: 700;
-    }
-    .root-cause-content p {
-      margin: 0;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #3c4043;
-    }
-
-    /* Bottom Grid */
-    .bottom-grid {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 24px;
-      margin-top: 24px;
-    }
-
-    /* Donut Chart */
-    .donut-chart-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      text-align: center;
-    }
-    .donut-chart {
-      position: relative;
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: conic-gradient(#1a73e8 calc(var(--percent) * 1%), #e8f0fe 0);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .donut-chart::before {
-      content: "";
-      position: absolute;
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: white;
-    }
-    .donut-val {
-      position: relative;
-      font-size: 18px;
-      font-weight: 700;
-      color: #1a73e8;
-    }
-    .donut-label {
-      margin-top: 12px;
-      font-size: 11px;
-      font-weight: 700;
-      color: #202124;
-      letter-spacing: 0.5px;
-    }
-    .donut-sublabel {
-      font-size: 10px;
-      color: #5f6368;
-      margin-top: 4px;
-    }
-
-    /* Tool Calls Details in Chat */
-    .tool-calls-details {
-      background: #f1f3f4;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #3c4043;
-      margin-bottom: 12px;
-      width: fit-content;
-      border: 1px solid #dadce0;
-    }
-    .tool-calls-details summary {
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .tool-calls-details summary::-webkit-details-marker {
-      display: none;
-    }
-    .tool-calls-details summary .arrow {
-      transition: transform 0.2s;
-    }
-    .tool-calls-details[open] summary .arrow {
-      transform: rotate(180deg);
-    }
-    .tool-calls-details ul {
-      margin: 8px 0 0 0;
-      padding-left: 20px;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 11px;
-      color: #5f6368;
-    }
-    .tool-calls-details li {
-      margin-bottom: 4px;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .rotating {
-      animation: spin 2s linear infinite;
-      display: inline-block;
-    }
-
-    /* Modal Styles */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-    }
-
-    .modal-content {
-      background-color: #fefefe;
-      margin: 15% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 50%;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-    }
-
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
-    }
-
-    .modal-form-group {
-      margin-bottom: 15px;
-    }
-
-    .modal-form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
-
-    .modal-form-group input[type="text"],
-    .modal-form-group textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #dadce0;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .btn-secondary {
-      background-color: #f1f3f4;
-      color: #3c4043;
-      border: 1px solid #dadce0;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn-secondary:hover {
-      background-color: #e8eaed;
-    }
-
-    .btn-primary {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn-primary:hover {
-      background-color: #1557b0;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      z-index: 10000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-card {
-      background: white;
-      border-radius: 8px;
-      width: 75%;
-      max-width: 800px;
-      height: 80%;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
-      overflow: hidden;
-    }
-    .modal-card-header {
-      padding: 16px 24px;
-      border-bottom: 1px solid #dadce0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-card-title {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 500;
-      color: #202124;
-    }
-    .modal-close-btn {
-      background: none;
-      border: none;
-      color: #5f6368;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-      border-radius: 50%;
-    }
-    .modal-close-btn:hover {
-      background-color: #f1f3f4;
-      color: #202124;
-    }
-    .modal-card-body {
-      padding: 24px;
-      overflow: auto;
-      background-color: #f8f9fa;
-      flex-grow: 1;
-    }
-    .modal-card-body pre {
-      margin: 0;
-    }
-
   </style>
 </head>
-<body>
+<body class="font-body-md text-on-surface">
 
-  <div class="app-container">
+  <!-- Main Mobile Shell Container -->
+  <div class="phone-frame">
+    <div class="phone-notch"></div>
     
-    <!-- Left Sidebar -->
-    <div class="sidebar">
-      <div class="logo-container" style="color: #1a73e8; margin-bottom: 20px;">
-        <span class="material-icons" style="font-size: 28px;">insights</span>
-      </div>
-      <div class="sidebar-menu">
-        <div class="menu-item" id="menu-investigation" onclick="switchTab('investigation')" title="Investigation">
-          <span class="material-icons">troubleshoot</span>
-        </div>
-        <div class="menu-item active" id="menu-dashboard" onclick="switchTab('dashboard')" title="Dashboard">
-          <span class="material-icons">table_chart</span>
-        </div>
-        <div class="menu-item" id="menu-bq" onclick="alert('Opening BigQuery Explorer...')" title="BigQuery Explorer">
-          <span class="material-icons">storage</span>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Main Content Container -->
-    <div class="main-container">
-      
-      <!-- Top Header -->
-      <div class="header">
-        <div class="header-left">
-          <span class="brand-text" style="font-weight: 700; font-size: 16px; color: #202124;">Investigation Agent</span>
-        </div>
-        <div class="header-right">
-          <span class="material-icons header-icon" title="History">history</span>
-          <span class="material-icons header-icon" title="Settings">settings</span>
-          <div class="status-badge" style="display: flex; align-items: center; gap: 6px; background: #e8f0fe; color: #1a73e8; padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 500;">
-            <span style="width: 8px; height: 8px; background: #1a73e8; border-radius: 50%;"></span>
-            System Ready
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboardView" class="flex flex-col h-full w-full">
+      <!-- Top AppBar -->
+      <header class="bg-white/80 backdrop-blur-md pt-7 pb-2 px-margin-mobile border-b border-outline-variant flex justify-between items-center z-40 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary overflow-hidden border border-outline-variant">
+            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ1r0qdSSn-CjLTEdT5QatbJ_A9EvuloLW15ed0REDVm7pXgRvGH2hQk2mp30TmCWeMRjlnTek-cuXXsRYDO7-rvZdArX9hkeq6sQrIWDAOoRFRJchLbxCHhxH-GrOaABbFORP7DkQtrNwW5qaaovd-6zUoEIkP3rrCyCJajCznQ6AXmdpKUyPweAx_ucuyikISuU2wM7Q1_Yqp8WoeS9iqMtq9AoFIUKFxAaI_PvB-djWjLvJbQi4eEPtst1qb1Z44UgrcdLqLg"/>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">EXECUTIVE PROFILE</span>
+            <span class="text-title-sm font-bold text-primary">Sales Command</span>
           </div>
         </div>
-      </div>
-      
-      <!-- Body Content -->
-      <div class="content-body">
-        
-        <!-- DASHBOARD TAB -->
-        <div class="tab-content active" id="content-dashboard">
-          <div id="dashboardContainer" class="dashboard-view" style="display: none;"></div>
-          <div id="dashboardEmptyState" class="empty-state">
-            <span class="material-icons">dashboard</span>
-            <p>Loading your Looker Dashboard...</p>
-          </div>
-        </div>
-        
-        <!-- INVESTIGATION TAB -->
-        <div class="tab-content" id="content-investigation">
-          
-          <!-- Empty State (Before running) -->
-          <div id="investEmptyState" class="empty-state">
-            <span class="material-icons">query_stats</span>
-            <h3>No Investigation Active</h3>
-            <p>Go to the <strong>Dashboard</strong> tab to select a stockout anomaly, or enter a custom query below.</p>
-          </div>
-          
-          <!-- Active Investigation Layout -->
-          <!-- Active Investigation Layout -->
-          <div id="investActiveLayout" style="display: none; height: 100%;" class="invest-split-layout">
-            
-            <!-- Left Pane: Chat Interface -->
-            <div class="invest-left-pane">
-              <div class="report-header-v2" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dadce0; padding-bottom: 12px;">
-                <h2 class="report-title-v2" style="font-size: 16px; font-weight: 700; color: #202124;">Agent Investigation</h2>
-                <span class="material-icons" style="color: #5f6368; cursor: pointer;">more_vert</span>
-              </div>
-              
-              <div class="chat-interface">
-                <div class="chat-messages" id="chatMessages">
-                  <!-- Messages will be appended here -->
-                </div>
-                <div class="chat-input-area">
-                  <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
-                  <button class="btn-send-chat" id="sendChatBtn" onclick="sendChatMessage()">
-                    <span class="material-icons">send</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Right Pane: Report View (Hidden initially, shown at the end) -->
-            <div class="invest-right-pane" id="investRightPane" style="display: none;">
-              <div class="report-header-v2">
-                <div>
-                  <h2 class="report-title-v2">Root Cause Analysis Report</h2>
-                  <p class="report-subtitle-v2" id="activeReportSubtitle">SKU-XXX Stockout Analysis</p>
-                </div>
-                <div class="report-actions" style="display: flex; gap: 8px;">
-                  <button class="btn btn-outline" style="border: none; display: flex; align-items: center; gap: 6px; padding: 8px 12px;" onclick="alert('Findings shared!')">
-                    <span class="material-icons" style="font-size: 18px;">share</span> Share
-                  </button>
-                  <button class="btn btn-outline" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px;" onclick="alert('Exporting PDF...')">
-                    <span class="material-icons" style="font-size: 18px;">file_download</span> Export PDF
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Primary Root Cause Alert Box -->
-              <div class="root-cause-card" id="rootCauseCard">
-                <div class="root-cause-icon">
-                  <span class="material-icons" style="font-size: 20px;">priority_high</span>
-                </div>
-                <div class="root-cause-content">
-                  <h3>Primary Root Cause</h3>
-                  <p id="rootCauseText"></p>
-                </div>
-              </div>
-              
-              <!-- Evidence Query Section -->
-              <div class="evidence-section" id="evidenceSection">
-                <!-- Dynamically populated -->
-              </div>
-              
-              <!-- Bottom Grid (Proposed Solution & Model Integrity) -->
-              <div class="bottom-grid">
-                <!-- Left Stack: Actions & Solution -->
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <!-- Proactive Actions Card -->
-                  <div class="card" style="min-height: auto; padding: 16px;">
-                    <div class="card-header-v2" style="margin-bottom: 12px; border-bottom: none; padding: 0;">
-                      <div class="card-title-container" style="display: flex; align-items: center; gap: 8px;">
-                        <span class="material-icons" style="color: #34a853; font-size: 20px;">offline_pin</span>
-                        <span class="card-title-v2" style="font-size: 14px; font-weight: 700; color: #202124;">Proactive Actions Taken</span>
-                      </div>
-                    </div>
-                    <div class="card-body-v2" id="proactiveActionsBody" style="font-size: 13px; line-height: 1.6; padding: 0; color: #3c4043;">
-                      <!-- Content -->
-                    </div>
-                  </div>
-
-                  <!-- Proposed Solution Card -->
-                  <div class="card" style="min-height: auto; padding: 16px;">
-                    <div class="card-header-v2" style="margin-bottom: 12px; border-bottom: none; padding: 0;">
-                      <div class="card-title-container" style="display: flex; align-items: center; gap: 8px;">
-                        <span class="material-icons" style="color: #1a73e8; font-size: 20px;">lightbulb</span>
-                        <span class="card-title-v2" style="font-size: 14px; font-weight: 700; color: #202124;">Proposed Solution</span>
-                      </div>
-                    </div>
-                    <div class="card-body-v2" id="proposedSolutionBody" style="font-size: 13px; line-height: 1.6; padding: 0; color: #3c4043;">
-                      <!-- Content -->
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Attribution Confidence Card -->
-                <div class="card" style="min-height: auto; align-items: center; justify-content: center; padding: 16px;">
-                  <div class="donut-chart-container">
-                    <div class="donut-chart" style="--percent: 98;">
-                      <span class="donut-val">98%</span>
-                    </div>
-                    <div class="donut-label">ATTRIBUTION CONFIDENCE</div>
-                    <div class="donut-sublabel">High-confidence attribution</div>
-                  </div>
-                </div>
-              </div>
-              
-            </div>
-            
-          </div>
-          
-
-          
-        </div>
-        
-        <!-- LIBRARY TAB (Mock) -->
-        <div class="tab-content" id="content-library">
-          <div class="empty-state">
-            <span class="material-icons">folder_open</span>
-            <h3>Saved Investigations</h3>
-            <p>No investigations saved yet.</p>
-          </div>
-        </div>
-        
-      </div>
-      
-    </div>
-
-
-  </div>
-
-  <!-- LookML Code Modal -->
-  <div id="lookmlModal" class="modal-backdrop" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-card-header">
-        <h3 class="modal-card-title" id="lookmlModalTitle">View LookML View</h3>
-        <button class="modal-close-btn" onclick="closeLookmlModal()">
-          <span class="material-icons">close</span>
+        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors duration-200">
+          <span class="material-icons text-primary" style="font-size: 20px;">settings</span>
         </button>
+      </header>
+
+      <!-- Scrollable Dashboard Content -->
+      <div class="flex-grow overflow-y-auto px-margin-mobile pt-4 pb-20 no-scrollbar">
+        <!-- Personalized Greeting -->
+        <section class="mb-5">
+          <h1 class="text-headline-md font-bold text-on-surface leading-tight">Welcome back, Jim</h1>
+          <div class="flex items-center gap-1.5 text-on-surface-variant mt-1">
+            <span class="material-icons text-primary" style="font-size: 16px;">location_on</span>
+            <span class="text-body-sm">Sales VP, California Region</span>
+          </div>
+        </section>
+
+        <!-- Summary Cards Grid -->
+        <div class="grid grid-cols-2 gap-sm mb-5">
+          <div class="bento-card bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-between h-28">
+            <div>
+              <span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">CA STORES</span>
+              <div class="mt-base text-headline-md font-bold text-primary leading-tight">12 Active</div>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+              <span class="text-body-sm text-on-surface-variant">All online</span>
+            </div>
+          </div>
+          
+          <div class="bento-card bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-between h-28">
+            <div>
+              <span class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">ALERTS</span>
+              <div class="mt-base text-headline-md font-bold text-error leading-tight">3 Alerting</div>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="material-icons text-error" style="font-size: 12px;">warning</span>
+              <span class="text-body-sm text-error font-medium">Critical levels</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <section class="mb-5">
+          <div class="flex items-center justify-between mb-sm">
+            <h2 class="text-title-sm font-bold text-on-surface">Active Store Alerts</h2>
+            <span class="text-[10px] font-bold text-primary tracking-wider uppercase cursor-pointer">VIEW ALL</span>
+          </div>
+          
+          <div class="space-y-sm">
+            <!-- Alert Item 1 -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="font-bold text-on-surface text-body-md">Bryceburgh, CA</h3>
+                  <p class="text-body-sm text-on-surface-variant mt-0.5">SKU-001 (Shoes) stockout detected</p>
+                </div>
+                <span class="px-2 py-0.5 bg-error/10 text-error text-[10px] font-bold tracking-wider rounded uppercase">HIGH</span>
+              </div>
+              <div class="mt-3">
+                <button onclick="startInvestigation('SKU-001', 'STR-001', 'Bryceburgh, CA')" class="w-full py-1.5 border border-primary text-primary font-bold text-body-sm rounded-lg hover:bg-primary-fixed hover:text-primary transition-all duration-200">
+                  Investigate Root Cause
+                </button>
+              </div>
+            </div>
+
+            <!-- Alert Item 2 -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="font-bold text-on-surface text-body-md">East Dustin, CA</h3>
+                  <p class="text-body-sm text-on-surface-variant mt-0.5">SKU-001 (Shoes) stockout detected</p>
+                </div>
+                <span class="px-2 py-0.5 bg-error/10 text-error text-[10px] font-bold tracking-wider rounded uppercase">HIGH</span>
+              </div>
+              <div class="mt-3">
+                <button onclick="startInvestigation('SKU-001', 'STR-002', 'East Dustin, CA')" class="w-full py-1.5 border border-primary text-primary font-bold text-body-sm rounded-lg hover:bg-primary-fixed hover:text-primary transition-all duration-200">
+                  Investigate Root Cause
+                </button>
+              </div>
+            </div>
+
+            <!-- Alert Item 3 -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="font-bold text-on-surface text-body-md">San Jose, CA</h3>
+                  <p class="text-body-sm text-on-surface-variant mt-0.5">SKU-002 (Apparel) low inventory warning</p>
+                </div>
+                <span class="px-2 py-0.5 bg-yellow-600/10 text-yellow-600 text-[10px] font-bold tracking-wider rounded uppercase">MEDIUM</span>
+              </div>
+              <div class="mt-3">
+                <button onclick="startInvestigation('SKU-002', 'STR-003', 'San Jose, CA')" class="w-full py-1.5 border border-primary text-primary font-bold text-body-sm rounded-lg hover:bg-primary-fixed hover:text-primary transition-all duration-200">
+                  Investigate Root Cause
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-      <div class="modal-card-body">
-        <pre><code id="lookmlModalCode" style="font-family: 'Roboto Mono', monospace; font-size: 13px; line-height: 1.5; color: #202124;"></code></pre>
+
+      <!-- Bottom Nav Bar -->
+      <nav class="absolute bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 bg-white border-t border-outline-variant pb-safe shrink-0">
+        <div class="flex flex-col items-center justify-center text-primary cursor-pointer">
+          <span class="material-icons">dashboard</span>
+          <span class="text-[9px] font-bold tracking-wider uppercase">Dashboard</span>
+        </div>
+        <div class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 cursor-pointer">
+          <span class="material-icons">notifications</span>
+          <span class="text-[9px] font-bold tracking-wider uppercase">Alerts</span>
+        </div>
+        <div class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 cursor-pointer">
+          <span class="material-icons">trending_up</span>
+          <span class="text-[9px] font-bold tracking-wider uppercase">Pipeline</span>
+        </div>
+      </nav>
+    </div>
+
+    <!-- INVESTIGATION VIEW (Initially Hidden) -->
+    <div id="investigationView" class="hidden flex-col h-full w-full bg-slate-50">
+      <!-- Top Navigation -->
+      <header class="bg-white pt-7 pb-2 px-margin-mobile border-b border-outline-variant flex justify-between items-center shrink-0">
+        <button onclick="closeInvestigation()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors duration-200">
+          <span class="material-icons text-on-surface-variant">arrow_back</span>
+        </button>
+        <span class="text-title-sm font-bold text-on-surface">RCA Investigation</span>
+        <button onclick="closeInvestigation()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors duration-200">
+          <span class="material-icons text-on-surface-variant">close</span>
+        </button>
+      </header>
+
+      <!-- Investigation Content Body -->
+      <div class="flex-grow overflow-y-auto px-margin-mobile pt-4 pb-24 no-scrollbar flex flex-col gap-4">
+        
+        <!-- Target Alert Card -->
+        <div class="bg-error-container/20 border border-error/10 p-md rounded-xl flex items-start gap-3 shrink-0">
+          <span class="material-icons text-error mt-0.5">warning</span>
+          <div>
+            <h4 class="font-bold text-on-error-container text-body-sm leading-none">RCA Triggered</h4>
+            <p id="investTargetDesc" class="text-body-sm text-on-error-container/90 mt-1"></p>
+          </div>
+        </div>
+
+        <!-- Active Stepper and Terminal (Shown during generation) -->
+        <div id="loadingStatusContainer" class="flex flex-col gap-4">
+          <!-- Stepper -->
+          <div class="bg-white border border-outline-variant rounded-xl p-md flex flex-col gap-3">
+            <h5 class="text-body-sm font-bold text-on-surface border-b border-outline-variant pb-2 leading-none">Execution Flow</h5>
+            <div class="space-y-3 relative pl-3">
+              <div class="absolute left-1 top-1 bottom-1 w-[1px] bg-outline-variant"></div>
+              
+              <!-- Step 1 -->
+              <div id="step-1" class="flex items-center gap-3 relative">
+                <span id="step-1-icon" class="material-icons text-gray-300 text-[16px]">pending</span>
+                <span class="text-body-sm text-on-surface-variant">Gathering Looker Context...</span>
+              </div>
+              <!-- Step 2 -->
+              <div id="step-2" class="flex items-center gap-3 relative">
+                <span id="step-2-icon" class="material-icons text-gray-300 text-[16px]">pending</span>
+                <span class="text-body-sm text-on-surface-variant">Traversing BigQuery Graph...</span>
+              </div>
+              <!-- Step 3 -->
+              <div id="step-3" class="flex items-center gap-3 relative">
+                <span id="step-3-icon" class="material-icons text-gray-300 text-[16px]">pending</span>
+                <span class="text-body-sm text-on-surface-variant">Inspecting Catalog Schemas...</span>
+              </div>
+              <!-- Step 4 -->
+              <div id="step-4" class="flex items-center gap-3 relative">
+                <span id="step-4-icon" class="material-icons text-gray-300 text-[16px]">pending</span>
+                <span class="text-body-sm text-on-surface-variant">Executing Validation SQL...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Analysis Log -->
+          <div class="bg-[#202124] rounded-xl overflow-hidden shadow-md flex flex-col h-44 shrink-0">
+            <div class="px-md py-1.5 bg-[#303134] flex justify-between items-center border-b border-[#3c4043]">
+              <span class="text-[9px] font-bold text-white/50 tracking-wider">LIVE LOG TERMINAL</span>
+              <div class="flex gap-1">
+                <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+              </div>
+            </div>
+            <div id="terminalContent" class="flex-grow p-3 font-mono text-[10px] text-green-400 overflow-y-auto space-y-1 select-all">
+              <!-- Logs appended dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- FINDINGS VIEW (Shown after done) -->
+        <div id="findingsContainer" class="hidden flex-col gap-4">
+          <!-- Root Cause Card -->
+          <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+            <div class="bg-primary/5 px-md py-2 border-b border-outline-variant flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="material-icons text-primary" style="font-size: 16px;">verified</span>
+                <h4 class="text-body-sm font-bold text-primary">Analysis Complete</h4>
+              </div>
+              <span class="text-[9px] font-bold text-on-surface-variant">JUST NOW</span>
+            </div>
+            <div class="p-md space-y-3">
+              <div>
+                <span class="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider block">Primary Root Cause</span>
+                <p id="findingsRootCause" class="text-body-sm text-on-surface mt-0.5 leading-relaxed"></p>
+              </div>
+              
+              <!-- Evidence SQL -->
+              <div class="border border-outline-variant rounded-lg overflow-hidden bg-slate-50">
+                <button onclick="toggleEvidenceSql()" class="w-full flex items-center justify-between p-2 hover:bg-slate-100 transition-colors">
+                  <div class="flex items-center gap-2">
+                    <span class="material-icons text-on-surface-variant" style="font-size: 16px;">terminal</span>
+                    <span class="text-body-sm font-bold text-on-surface">Technical Evidence</span>
+                  </div>
+                  <span id="evidenceChevron" class="material-icons text-on-surface-variant" style="font-size: 16px;">expand_more</span>
+                </button>
+                <div id="evidenceSqlBlock" class="hidden p-2 border-t border-outline-variant bg-[#202124]">
+                  <pre id="evidenceSql" class="text-blue-300 font-mono text-[10px] overflow-x-auto leading-relaxed select-all"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Proactive Actions Taken -->
+          <div class="bg-white border border-outline-variant rounded-xl p-md shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="material-icons text-green-600" style="font-size: 18px;">offline_pin</span>
+              <h5 class="text-body-sm font-bold text-on-surface">Proactive Actions Taken</h5>
+            </div>
+            <p id="findingsActions" class="text-body-sm text-on-surface-variant leading-relaxed"></p>
+          </div>
+
+          <!-- Proposed Solution -->
+          <div class="bg-white border border-outline-variant rounded-xl p-md shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="material-icons text-primary" style="font-size: 18px;">lightbulb</span>
+              <h5 class="text-body-sm font-bold text-on-surface">Proposed Solution</h5>
+            </div>
+            <p id="findingsSolution" class="text-body-sm text-on-surface-variant leading-relaxed"></p>
+          </div>
+        </div>
+
+        <!-- Chat Conversation (Messages are rendered here when interactive questions are active) -->
+        <div id="chatLog" class="hidden flex-col gap-2 overflow-y-auto">
+          <!-- Dynamically populated bubble messages -->
+        </div>
+
+      </div>
+
+      <!-- Sticky Mobile Bottom Chat Input -->
+      <div id="chatInputArea" class="hidden absolute bottom-0 left-0 w-full bg-white border-t border-outline-variant px-margin-mobile py-2.5 z-50 shrink-0">
+        <div class="relative flex items-center w-full">
+          <input id="chatInput" onkeypress="handleKeyPress(event)" class="w-full h-10 bg-slate-100 rounded-full pl-4 pr-12 border-transparent focus:border-primary focus:ring-0 text-body-sm" placeholder="Ask Follow-up Question..." type="text"/>
+          <button id="sendBtn" onclick="submitTextResponse()" class="absolute right-1 w-8 h-8 bg-primary text-on-primary rounded-full flex items-center justify-center hover:brightness-115 active:scale-95 transition-transform duration-150">
+            <span class="material-icons" style="font-size: 16px;">arrow_upward</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Scripts -->
   <script>
-    const contentDashboard = document.getElementById('content-dashboard');
-    const contentInvestigation = document.getElementById('content-investigation');
-    const contentLibrary = document.getElementById('content-library');
-    
-    const dashboardContainer = document.getElementById('dashboardContainer');
-    const dashboardEmptyState = document.getElementById('dashboardEmptyState');
-    const investEmptyState = document.getElementById('investEmptyState');
-    const investActiveLayout = document.getElementById('investActiveLayout');
-    
-
-
+    let currentSessionId = "";
     let eventSource = null;
-    let accumulatedOutput = "";
-    let globalDashboardData = null;
-    let currentSessionId = null;
     let activeInteractionQuestions = [];
-    let activeToolCalls = [];
 
-    function switchTab(tabName) {
-      // Reset active states
-      document.getElementById('menu-dashboard').classList.remove('active');
-      document.getElementById('menu-investigation').classList.remove('active');
+    function startInvestigation(sku, storeId, storeName) {
+      currentSessionId = "session_" + Date.now();
+      const query = `Stockout alert for SKU ${sku} in Store ${storeId} (${storeName})`;
       
-      contentDashboard.className = 'tab-content';
-      contentInvestigation.className = 'tab-content';
-      contentLibrary.className = 'tab-content';
-      
-      if (tabName === 'dashboard') {
-        document.getElementById('menu-dashboard').classList.add('active');
-        contentDashboard.className = 'tab-content active';
-      } else if (tabName === 'investigation') {
-        document.getElementById('menu-investigation').classList.add('active');
-        contentInvestigation.className = 'tab-content active';
-      } else if (tabName === 'library') {
-        contentLibrary.className = 'tab-content active';
+      // Update target alert card description
+      document.getElementById('investTargetDesc').innerText = `${sku} Anomaly at ${storeName} (${storeId}).`;
+
+      // Reset UI elements
+      document.getElementById('dashboardView').classList.add('hidden');
+      document.getElementById('investigationView').classList.remove('hidden');
+      document.getElementById('loadingStatusContainer').classList.remove('hidden');
+      document.getElementById('findingsContainer').classList.add('hidden');
+      document.getElementById('chatLog').classList.add('hidden');
+      document.getElementById('chatInputArea').classList.add('hidden');
+      document.getElementById('chatLog').innerHTML = "";
+      document.getElementById('terminalContent').innerHTML = "";
+
+      // Reset Stepper
+      resetStepper();
+
+      // Submit API Query
+      initiateQuery(query);
+    }
+
+    function closeInvestigation() {
+      if (eventSource) {
+        eventSource.close();
+      }
+      document.getElementById('investigationView').classList.add('hidden');
+      document.getElementById('dashboardView').classList.remove('hidden');
+    }
+
+    function resetStepper() {
+      for (let i = 1; i <= 4; i++) {
+        const icon = document.getElementById(`step-${i}-icon`);
+        icon.innerText = "pending";
+        icon.className = "material-icons text-gray-300 text-[16px]";
       }
     }
 
-    function appendConsoleLog(type, text) {
-      console.log(`[${type.toUpperCase()}] ${text}`);
-    }
-
-    function extractJson(text) {
-      const start = text.indexOf('{');
-      const end = text.lastIndexOf('}');
-      if (start !== -1 && end !== -1 && end > start) {
-        return text.substring(start, end + 1);
+    function updateStep(stepIndex, status) {
+      const icon = document.getElementById(`step-${stepIndex}-icon`);
+      if (status === 'active') {
+        icon.className = "spinner shrink-0";
+        icon.innerText = "";
+      } else if (status === 'complete') {
+        icon.className = "material-icons text-green-500 text-[16px] shrink-0";
+        icon.innerText = "check_circle";
       }
-      return null;
     }
 
-    function updateRootCauseProgress(text) {
-      // Clean up markdown bold headers
-      let cleaned = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Skip generic tool interaction thoughts
-      if (text.includes("Tool Interaction") || text.includes("Tool Availability") || text.includes("Exploring Output Location") || text.includes("Exploring the sales_inv dataset")) {
+    async function initiateQuery(query) {
+      appendTerminalLog("> INITIALIZING AGENT...", "info");
+      updateStep(1, 'active');
+
+      try {
+        const res = await fetch('/api/query/init', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: query,
+            context: "",
+            session_id: currentSessionId
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error("Init request failed: " + res.statusText);
+        }
+      } catch (e) {
+        appendTerminalLog(`> CONNECTION ERROR: ${e.message}`, "error");
+        updateStep(1, 'complete');
         return;
       }
-      
-      const rcCardBody = document.getElementById('rcCardBody');
-      rcCardBody.innerHTML = `
-        <div style="font-size: 14px; line-height: 1.5; color: #3c4043;">
-          ${cleaned}
-        </div>
-      `;
+
+      // Open event stream
+      eventSource = new EventSource(`/api/query/stream?session_id=${currentSessionId}`);
+
+      eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'interaction_required') {
+          handleInteraction(data);
+          return;
+        }
+
+        if (data.status === 'error') {
+          eventSource.close();
+          appendTerminalLog(`> AGENT ERROR: ${data.error}`, "error");
+          return;
+        }
+
+        if (data.text) {
+          appendTerminalLog(data.text);
+          parseLogForStepper(data.text);
+        }
+
+        if (data.status === 'done') {
+          eventSource.close();
+          completeAllSteps();
+          renderFinalReport(data.result);
+        }
+      };
+
+      eventSource.onerror = function() {
+        eventSource.close();
+        appendTerminalLog("> SERVER DISCONNECTED.", "error");
+      }
     }
 
-    const STATUS_PHRASES = [
-      "Formulating RCA Reasoning...",
-      "Searching Knowledge Catalog for existing Looker assets...",
-      "Discovering base BigQuery tables for Dashboard...",
-      "Traversing BigQuery Graph for related operational tables...",
-      "Inspecting metadata and data lineage in Knowledge Catalog...",
-      "Executing SQL to validate shipment reasoning..."
-    ];
-    let currentStatusText = "Agent is investigating...";
+    function appendTerminalLog(text, level = "normal") {
+      const consoleLog = document.getElementById('terminalContent');
+      const p = document.createElement('p');
+      p.className = "leading-normal select-all";
+      if (level === 'error') {
+        p.classList.add('text-red-500');
+      } else if (level === 'info') {
+        p.classList.add('text-blue-400');
+      }
+      p.innerText = text;
+      consoleLog.appendChild(p);
+      consoleLog.scrollTop = consoleLog.scrollHeight;
+    }
 
-    function getLatestStatus(text) {
-      let latestStatus = "";
-      let latestIndex = -1;
-      STATUS_PHRASES.forEach((phrase) => {
-        const idx = text.lastIndexOf(phrase);
-        if (idx > latestIndex) {
-          latestIndex = idx;
-          latestStatus = phrase;
+    function parseLogForStepper(text) {
+      if (text.includes("Formulating RCA Reasoning...")) {
+        updateStep(1, 'active');
+      } else if (text.includes("Searching Knowledge Catalog")) {
+        updateStep(1, 'complete');
+        updateStep(2, 'active');
+      } else if (text.includes("Traversing BigQuery Graph")) {
+        updateStep(2, 'complete');
+        updateStep(3, 'active');
+      } else if (text.includes("Executing SQL")) {
+        updateStep(3, 'complete');
+        updateStep(4, 'active');
+      }
+    }
+
+    function completeAllSteps() {
+      for (let i = 1; i <= 4; i++) {
+        updateStep(i, 'complete');
+      }
+    }
+
+    function renderFinalReport(resultText) {
+      let report = {};
+      try {
+        report = JSON.parse(resultText);
+      } catch (e) {
+        console.error("Failed to parse JSON report:", e);
+        appendTerminalLog("> ERROR: Malformed report payload.", "error");
+        return;
+      }
+
+      // Populate Findings card details
+      document.getElementById('findingsRootCause').innerText = report.root_cause;
+      document.getElementById('evidenceSql').innerText = report.evidence.sql_executed;
+      document.getElementById('findingsActions').innerText = report.proactive_actions_taken;
+      document.getElementById('findingsSolution').innerText = report.proposed_solution;
+
+      // Swap views
+      document.getElementById('loadingStatusContainer').classList.add('hidden');
+      document.getElementById('findingsContainer').classList.remove('hidden');
+      document.getElementById('chatLog').classList.remove('hidden');
+      document.getElementById('chatInputArea').classList.remove('hidden');
+
+      appendChatMessage("agent", "Investigation completed. Please review the root cause and generated LookML views above. Let me know if you have any questions!");
+    }
+
+    function toggleEvidenceSql() {
+      const block = document.getElementById('evidenceSqlBlock');
+      const icon = document.getElementById('evidenceChevron');
+      const isHidden = block.classList.contains('hidden');
+      if (isHidden) {
+        block.classList.remove('hidden');
+        icon.innerText = "expand_less";
+      } else {
+        block.classList.add('hidden');
+        icon.innerText = "expand_more";
+      }
+    }
+
+    function handleInteraction(data) {
+      activeInteractionQuestions = data.questions;
+
+      // Show Chat panel, swap from loading status
+      document.getElementById('loadingStatusContainer').classList.add('hidden');
+      document.getElementById('chatLog').classList.remove('hidden');
+      document.getElementById('chatInputArea').classList.remove('hidden');
+
+      data.questions.forEach((q) => {
+        if (q.options && q.options.length > 0) {
+          appendChatMessage('agent', q.question, q.options);
+        } else {
+          appendChatMessage('agent', q.question);
         }
       });
-      return latestStatus;
     }
 
-    function updateLoaderStatus(text) {
-      const status = getLatestStatus(text);
-      if (status) {
-        currentStatusText = status;
-        const textSpan = document.getElementById('loadingMessageText');
-        if (textSpan) {
-          textSpan.innerText = `Agent: ${currentStatusText}`;
-        }
-      }
-    }
-
-    function updateLoaderTool(toolName) {
-      const textSpan = document.getElementById('loadingMessageText');
-      if (textSpan) {
-        const cleanName = toolName.replace(/^mcp_/, '');
-        textSpan.innerText = `Agent: ${currentStatusText} (${cleanName})`;
-      }
-    }
-
-    function appendLoadingMessage() {
-      const chatMessages = document.getElementById('chatMessages');
+    function appendChatMessage(sender, text, options = null) {
+      const chatLog = document.getElementById('chatLog');
+      const bubble = document.createElement('div');
+      bubble.className = `p-3 text-body-sm max-w-[85%] rounded-xl flex flex-col gap-2 shadow-sm ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-agent'}`;
       
-      // Remove existing if any
-      removeLoadingMessage();
-      
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message status';
-      msgDiv.id = 'loadingMessage';
-      msgDiv.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-          <span class="material-icons rotating" style="font-size: 16px; color: #1a73e8;">sync</span>
-          <span id="loadingMessageText">Agent is investigating...</span>
-        </div>
-      `;
-      chatMessages.appendChild(msgDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+      // Text
+      const textSpan = document.createElement('span');
+      textSpan.innerText = text;
+      bubble.appendChild(textSpan);
 
-    function removeLoadingMessage() {
-      const loadingMsg = document.getElementById('loadingMessage');
-      if (loadingMsg) {
-        loadingMsg.remove();
-      }
-    }
-
-    function appendChatMessage(sender, text, type = 'text', options = []) {
-      const chatMessages = document.getElementById('chatMessages');
-      const msgDiv = document.createElement('div');
-      
-      if (type === 'status') {
-        msgDiv.className = 'message status';
-        msgDiv.innerText = text;
-      } else {
-        msgDiv.className = `message ${sender}`;
-        // Clean up markdown bold and code blocks
-        let cleanedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        cleanedText = cleanedText.replace(/`(.*?)`/g, '<code>$1</code>');
-        msgDiv.innerHTML = `<div class="message-text">${cleanedText}</div>`;
-        
-        if (options && options.length > 0) {
-          const optionsDiv = document.createElement('div');
-          optionsDiv.className = 'chat-options';
-          
-          options.forEach(opt => {
-            const optBtn = document.createElement('button');
-            optBtn.className = 'chat-option-btn';
-            optBtn.innerText = opt.text;
-            optBtn.onclick = () => selectChatOption(opt.id, opt.text);
-            optionsDiv.appendChild(optBtn);
-          });
-          
-          msgDiv.appendChild(optionsDiv);
-        }
-      }
-      
-      chatMessages.appendChild(msgDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function appendFinalAgentMessage(report, toolCalls) {
-      const chatMessages = document.getElementById('chatMessages');
-      
-      // 1. Append tool calls collapsible if there were tool calls
-      if (toolCalls && toolCalls.length > 0) {
-        const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'message status';
-        detailsDiv.style.padding = '0';
-        detailsDiv.style.alignSelf = 'flex-start';
-        detailsDiv.style.background = 'transparent';
-        
-        let listItems = toolCalls.map(tc => `<li>${tc.name}(${JSON.stringify(tc.args)})</li>`).join('');
-        
-        detailsDiv.innerHTML = `
-          <details class="tool-calls-details">
-            <summary>
-              <span class="material-icons" style="font-size: 16px; color: #1a73e8;">settings</span>
-              <span>Ran ${toolCalls.length} queries across Looker and BigQuery</span>
-              <span class="material-icons arrow" style="font-size: 16px; margin-left: auto;">expand_more</span>
-            </summary>
-            <ul>
-              ${listItems}
-            </ul>
-          </details>
-        `;
-        chatMessages.appendChild(detailsDiv);
+      // Options
+      if (options) {
+        const optContainer = document.createElement('div');
+        optContainer.className = "flex flex-col gap-1.5 mt-1 shrink-0";
+        options.forEach((opt) => {
+          const btn = document.createElement('button');
+          btn.className = "w-full py-1.5 px-3 bg-white hover:bg-primary-fixed border border-primary text-primary font-medium text-left rounded-lg text-body-sm transition-all duration-150";
+          btn.innerText = opt;
+          btn.onclick = () => selectChatOption(opt, optContainer);
+          optContainer.appendChild(btn);
+        });
+        bubble.appendChild(optContainer);
       }
 
-      // 2. Append Agent Message
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message agent';
-      
-      const summary = report.investigation_summary;
-      // Use proposed_solution if available, otherwise default question text
-      const solutionText = report.proposed_solution || "Would you like to model these tables?";
-      const text = `${summary}\n\n${solutionText}`;
-      
-      let cleanedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      cleanedText = cleanedText.replace(/`(.*?)`/g, '<code>$1</code>');
-      
-      let optionsHTML = '';
-      if (report.proposed_actions && report.proposed_actions.length > 0) {
-        optionsHTML = report.proposed_actions.map(action => {
-          let onClickStr = '';
-          if (action.id === 'generate_lookml') {
-            const tables = action.metadata?.tables_to_model?.join(',') || '';
-            onClickStr = `generateLookML('${tables}')`;
-          } else if (action.id === 'open_sql_workspace') {
-            onClickStr = `alert('Opening BigQuery Workspace...')`;
-          } else {
-            onClickStr = `alert('Triggered action: ${action.id}')`;
-          }
-          
-          const icon = action.icon ? `<span class="material-icons" style="font-size: 16px; margin-right: 6px;">${action.icon}</span>` : '';
-          const btnClass = action.id === 'generate_lookml' ? 'btn btn-filled' : 'btn btn-outline';
-          const styleStr = action.id === 'generate_lookml' ? 'width: auto; padding: 8px 16px; font-size: 13px;' : 'width: auto; padding: 8px 16px; font-size: 13px; color: #5f6368; border-color: #dadce0;';
-          
-          return `
-            <button class="${btnClass}" onclick="${onClickStr}" style="${styleStr}">
-              ${icon}${action.action_button_text}
-            </button>
-          `;
-        }).join('');
-      }
-      
-      msgDiv.innerHTML = `
-        <div class="message-text">${cleanedText.replace(/\n/g, '<br>')}</div>
-        <div class="chat-options" style="margin-top: 16px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;">
-          ${optionsHTML}
-        </div>
-      `;
-      
-      chatMessages.appendChild(msgDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      chatLog.appendChild(bubble);
+      chatLog.scrollTop = chatLog.scrollHeight;
     }
 
-    async function selectChatOption(optionId, optionText) {
-      appendChatMessage('user', optionText);
-      disableLastChatOptions();
-      
-      if (activeInteractionQuestions.length === 0) return;
-      
+    function selectChatOption(selectedOption, optContainer) {
+      // Disable all options in that container
+      optContainer.querySelectorAll('button').forEach((b) => {
+        b.disabled = true;
+        b.style.opacity = 0.5;
+        b.onclick = null;
+      });
+
+      // Append user message
+      appendChatMessage('user', selectedOption);
+
+      // Send to Backend
       const responses = [{
-        selected_option_ids: [optionId],
-        write_in_response: "",
+        selected_option_ids: [],
+        write_in_response: selectedOption,
         skipped: false
       }];
-      
-      await submitInteractionResponse(responses);
-    }
-
-    async function sendChatMessage() {
-      const chatInput = document.getElementById('chatInput');
-      const text = chatInput.value.trim();
-      if (!text) return;
-      
-      appendChatMessage('user', text);
-      chatInput.value = "";
-      
-      if (activeInteractionQuestions.length > 0) {
-        disableLastChatOptions();
-        
-        const responses = [{
-          selected_option_ids: [],
-          write_in_response: text,
-          skipped: false
-        }];
-        
-        await submitInteractionResponse(responses);
-      } else {
-        appendChatMessage('agent', "I'm currently busy or not in an active session. Please start an investigation from the Dashboard tab.");
-      }
-    }
-    
-    function handleChatKeyPress(event) {
-      if (event.key === 'Enter') {
-        sendChatMessage();
-      }
-    }
-
-    function disableLastChatOptions() {
-      const chatMessages = document.getElementById('chatMessages');
-      const optionButtons = chatMessages.querySelectorAll('.chat-option-btn');
-      optionButtons.forEach(btn => {
-        btn.disabled = true;
-        btn.style.opacity = 0.6;
-        btn.style.cursor = 'default';
-        btn.onclick = null;
-      });
+      submitInteractionResponse(responses);
     }
 
     async function submitInteractionResponse(responses) {
+      // Show mini-loading
       const chatInput = document.getElementById('chatInput');
-      const sendBtn = document.getElementById('sendChatBtn');
-      if (chatInput) chatInput.disabled = true;
-      if (sendBtn) sendBtn.disabled = true;
-      
+      chatInput.disabled = true;
+
       try {
         const res = await fetch('/api/interaction/resolve', {
           method: 'POST',
@@ -1592,518 +725,40 @@
             responses: responses
           })
         });
-        
+
         if (!res.ok) {
-          throw new Error(await res.text());
+          throw new Error("Failed to submit response: " + res.statusText);
         }
-        
-        activeInteractionQuestions = [];
-        if (chatInput) chatInput.disabled = false;
-        if (sendBtn) sendBtn.disabled = false;
+
+        chatInput.disabled = false;
         chatInput.focus();
-        
-        // Show loading since agent resumes
-        appendLoadingMessage();
-
-      } catch (err) {
-        console.error("Failed to submit interaction:", err);
-        appendChatMessage('system', "Failed to submit response: " + err.message);
-        if (chatInput) chatInput.disabled = false;
-        if (sendBtn) sendBtn.disabled = false;
-      }
-    }
-
-    async function startInvestigation(query, additionalContext = "") {
-      if (!query) return;
-
-      // Switch to investigation tab and prepare layout
-      switchTab('investigation');
-      investEmptyState.style.display = 'none';
-      investActiveLayout.style.display = 'flex'; // Use flex for split layout
-      
-      // Hide right pane initially
-      document.getElementById('investRightPane').style.display = 'none';
-      
-      accumulatedOutput = "";
-      activeToolCalls = [];
-
-      // Clear chat messages
-      const chatMessages = document.getElementById('chatMessages');
-      chatMessages.innerHTML = "";
-
-      // Parse query details
-      const match = query.match(/Stockout alert for SKU (.*?) in Store (.*?) \((.*?)\)/);
-      let sku = "SKU-001";
-      let storeId = "STR-030";
-      let storeName = "Cross, Valdez and Wallace Shoes";
-      if (match) {
-        sku = match[1];
-        storeId = match[2];
-        storeName = match[3];
-      }
-
-      // Welcome message in chat (styled as alert)
-      appendChatMessage('alert', `System Alert: SKU-${sku} has experienced a stockout at Store ${storeId} (${storeName}). Can you investigate the root cause?`);
-
-      // Show loading status
-      appendLoadingMessage();
-
-      currentSessionId = "session_" + Date.now();
-      
-      try {
-        const initResponse = await fetch('/api/query/init', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: query,
-            context: additionalContext,
-            session_id: currentSessionId
-          })
-        });
-        
-        if (!initResponse.ok) {
-          throw new Error(`Failed to initialize agent: ${initResponse.statusText}`);
-        }
       } catch (e) {
-        console.error("Init failed:", e);
-        removeLoadingMessage();
-        appendChatMessage('system', "Connection Error: Could not initialize the RCA Agent.");
-        return;
-      }
-
-      eventSource = new EventSource(`/api/query/stream?session_id=${currentSessionId}`);
-
-      eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-
-        if (data.type === 'interaction_required') {
-          handleInteractionRequired(data);
-          return;
-        }
-
-        if (data.status === 'error') {
-          eventSource.close();
-          removeLoadingMessage();
-          appendChatMessage('system', `Agent Error: ${data.error}`);
-          return;
-        }
-
-        if (data.status === 'done') {
-          eventSource.close();
-          removeLoadingMessage();
-          
-          try {
-            const jsonText = extractJson(accumulatedOutput);
-            if (!jsonText) {
-              throw new Error("No JSON report block found in agent output.");
-            }
-            const report = JSON.parse(jsonText.trim());
-            
-            // Append final agent response to chat
-            appendFinalAgentMessage(report, activeToolCalls);
-
-            // Show right pane and render report
-            document.getElementById('investRightPane').style.display = 'block';
-            renderRCAReport(query, report);
-            
-
-          } catch (e) {
-            console.error("Failed to parse JSON:", e);
-            appendChatMessage('agent', "Error rendering report. See console logs.");
-            document.getElementById('investRightPane').style.display = 'block';
-            // Fallback render to root cause text if box exists
-            const rcText = document.getElementById('rootCauseText');
-            if (rcText) {
-              rcText.innerHTML = `<div style="color:red; font-weight:500;">Error rendering report</div><pre style="white-space: pre-wrap; font-size:12px;">${accumulatedOutput}</pre>`;
-            }
-          }
-          return;
-        }
-
-        if (data.type === 'thought') {
-          appendConsoleLog('thought', data.text);
-        } else if (data.type === 'tool_call') {
-          appendConsoleLog('tool', `${data.name}(${data.args})`);
-          activeToolCalls.push({ name: data.name, args: data.args });
-          updateLoaderTool(data.name);
-        } else if (data.type === 'final_output') {
-          accumulatedOutput += data.text;
-          updateLoaderStatus(accumulatedOutput);
-        }
-      };
-
-       eventSource.onerror = function(err) {
-        console.error("SSE Error:", err);
-        eventSource.close();
-        removeLoadingMessage();
-        appendChatMessage('system', "Connection Error: Could not reach the RCA Agent server.");
-      };
-    }
-
-    function handleInteractionRequired(data) {
-      removeLoadingMessage(); // Remove loading before showing question
-      activeInteractionQuestions = data.questions;
-      
-      data.questions.forEach((q) => {
-        if (q.options && q.options.length > 0) {
-          appendChatMessage('agent', q.question, 'text', q.options);
-        } else {
-          appendChatMessage('agent', q.question + " (Please type your response below)");
-        }
-      });
-    }
-
-    function renderRCAReport(query, report) {
-      const match = query.match(/Stockout alert for SKU (.*?) in Store (.*?) \((.*?)\)/);
-      let sku = "SKU-001";
-      if (match) {
-        sku = match[1];
-      }
-      document.getElementById('activeReportSubtitle').innerText = `${sku} Stockout Analysis`;
-
-      // 1. Populate Primary Root Cause Text
-      document.getElementById('rootCauseText').innerText = report.root_cause;
-
-      // 2. Populate Evidence Section
-      const tableQueried = report.evidence.tables_queried[0] || 'project.dataset.shipments';
-      document.getElementById('evidenceSection').innerHTML = `
-        <div class="evidence-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div class="evidence-title-container" style="display: flex; align-items: center; gap: 8px;">
-            <span class="material-icons" style="color: #5f6368; font-size: 18px;">storage</span>
-            <span style="font-size: 11px; font-weight: 700; color: #5f6368; letter-spacing: 0.8px;">EVIDENCE: INVESTIGATORY QUERY</span>
-          </div>
-          <span style="font-size: 11px; font-weight: 700; color: #1a73e8; background: #e8f0fe; padding: 4px 8px; border-radius: 4px; letter-spacing: 0.5px;">BigQuery SQL</span>
-        </div>
-        <div class="sql-container" style="border: 1px solid #dadce0; border-radius: 8px; overflow: hidden; background: #202124;">
-          <div class="sql-header" style="background: #2d2f31; color: #e8eaed; padding: 10px 16px; font-family: 'Roboto Mono', monospace; font-size: 11px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3c4043;">
-            <span>shipment_latency_check.sql</span>
-            <span class="material-icons" style="font-size: 16px; cursor: pointer; color: #9aa0a6;" onclick="navigator.clipboard.writeText(\`${report.evidence.sql_executed.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`); alert('Query copied!')">content_copy</span>
-          </div>
-          <pre class="sql-console" style="margin: 0; border-radius: 0; padding: 16px; background: #202124; color: #f1f3f4; font-size: 12px; line-height: 1.5; overflow-x: auto;"><code>${report.evidence.sql_executed}</code></pre>
-        </div>
-      `;
-
-      // 3. Populate Proactive Actions Body
-      const actionsText = report.proactive_actions_taken || "Generated missing semantic layer view files in Looker.";
-      let cleanedActionsText = actionsText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      cleanedActionsText = cleanedActionsText.replace(/`/g, '<code>$1</code>');
-      document.getElementById('proactiveActionsBody').innerHTML = `<p style="margin:0;">${cleanedActionsText}</p>`;
-
-      // 4. Populate Proposed Solution Body
-      const solutionText = report.proposed_solution || "Model the unmodeled tables in Looker to enable visibility.";
-      let cleanedSolutionText = solutionText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      cleanedSolutionText = cleanedSolutionText.replace(/`/g, '<code>$1</code>');
-      document.getElementById('proposedSolutionBody').innerHTML = `<p style="margin:0;">${cleanedSolutionText}</p>`;
-    }
-
-    async function generateLookML(tables) {
-      appendChatMessage('user', `Generate LookML for tables: ${tables}`);
-      disableLastChatOptions();
-      appendLoadingMessage();
-      
-      const query = `The user has approved the generation of LookML for the following tables: ${tables}. Please generate the LookML views for these tables. Make sure to find the active model's project and connection first, switch to development mode, create the views, and validate the project.`;
-      
-      try {
-        const initResponse = await fetch('/api/query/init', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: query,
-            context: "",
-            session_id: currentSessionId
-          })
-        });
-        
-        if (!initResponse.ok) {
-          throw new Error(`Failed to initialize LookML generation: ${initResponse.statusText}`);
-        }
-        
-        // Re-establish EventSource stream to receive steps
-        if (eventSource) {
-          eventSource.close();
-        }
-        
-        eventSource = new EventSource(`/api/query/stream?session_id=${currentSessionId}`);
-        accumulatedOutput = "";
-        
-        eventSource.onmessage = function(event) {
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'interaction_required') {
-            handleInteractionRequired(data);
-            return;
-          }
-          
-          if (data.status === 'done') {
-            eventSource.close();
-            removeLoadingMessage();
-            
-            try {
-              const jsonText = extractJson(accumulatedOutput);
-              if (!jsonText) {
-                throw new Error("No JSON report block found in LookML generation output.");
-              }
-              const result = JSON.parse(jsonText.trim());
-              
-              const msgDiv = document.createElement('div');
-              msgDiv.className = 'message agent';
-              
-              let cleanedSummary = (result.summary || "LookML views successfully generated.").replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-              
-              let buttonsHTML = '';
-              if (result.generated_views && result.generated_views.length > 0) {
-                window.generatedLookmlCode = window.generatedLookmlCode || {};
-                
-                result.generated_views.forEach((view, idx) => {
-                  const key = `view_${Date.now()}_${idx}`;
-                  window.generatedLookmlCode[key] = {
-                    title: view.file_path,
-                    content: view.view_content
-                  };
-                  buttonsHTML += `
-                    <button class="btn btn-outline" onclick="openLookmlModal(window.generatedLookmlCode['${key}'].title, window.generatedLookmlCode['${key}'].content)" style="width: auto; padding: 8px 12px; font-size: 13px; margin-right: 8px; color: #1a73e8; border-color: #dadce0;">
-                      <span class="material-icons" style="font-size: 16px; margin-right: 6px;">visibility</span>
-                      View ${view.file_path.split('/').pop()}
-                    </button>
-                  `;
-                });
-              }
-              
-              msgDiv.innerHTML = `
-                <div class="message-text">${cleanedSummary}</div>
-                <div class="chat-options" style="margin-top: 12px; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap;">
-                  ${buttonsHTML}
-                </div>
-              `;
-              
-              const chatMessages = document.getElementById('chatMessages');
-              chatMessages.appendChild(msgDiv);
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            } catch (e) {
-              console.error("Failed to parse LookML JSON:", e);
-              // Fallback
-              appendChatMessage('agent', accumulatedOutput || "LookML generation completed successfully.");
-            }
-            return;
-          }
-          
-          if (data.type === 'thought') {
-            appendConsoleLog('thought', data.text);
-          } else if (data.type === 'tool_call') {
-            appendConsoleLog('tool', `${data.name}(${data.args})`);
-          } else if (data.type === 'final_output') {
-            accumulatedOutput += data.text;
-          }
-        };
-        
-        eventSource.onerror = function(err) {
-          console.error("SSE Error:", err);
-          eventSource.close();
-          removeLoadingMessage();
-          appendChatMessage('system', "Error during LookML generation.");
-        };
-        
-      } catch (e) {
-        console.error("Failed to trigger LookML generation:", e);
-        removeLoadingMessage();
-        appendChatMessage('system', "Error: " + e.message);
+        appendChatMessage('system', "Error: Could not send reply.");
+        chatInput.disabled = false;
       }
     }
 
-    async function loadDashboard(dashboardId) {
-      dashboardEmptyState.style.display = 'flex';
-      dashboardContainer.style.display = 'none';
-      
-      try {
-        const response = await fetch(`/api/dashboard/${dashboardId}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const dashboard = await response.json();
-        globalDashboardData = dashboard;
-        
-        dashboardEmptyState.style.display = 'none';
-        dashboardContainer.style.display = 'block';
-        
-        dashboardContainer.innerHTML = `<h2 class="dashboard-title">${dashboard.title}</h2>`;
-        if (dashboard.description) {
-          dashboardContainer.innerHTML += `<p class="dashboard-desc">${dashboard.description}</p>`;
-        }
-        
-        for (const tile of dashboard.tiles) {
-          const tileDiv = document.createElement('div');
-          tileDiv.style.marginBottom = "24px";
-          tileDiv.innerHTML = `<h3 style="font-size: 15px; font-weight: 500; margin-bottom: 12px; color: #3c4043;">${tile.title}</h3>`;
-          
-          if (tile.error) {
-            tileDiv.innerHTML += `<div style="color: red; font-size: 14px;">Error: ${tile.error}</div>`;
-          } else if (tile.data && tile.data.length > 0) {
-            const table = document.createElement('table');
-            table.className = "dashboard-table";
-            
-            const headers = Object.keys(tile.data[0]);
-            const headerRow = document.createElement('tr');
-            for (const h of headers) {
-              const th = document.createElement('th');
-              th.innerText = h.split('.').pop().replace(/_/g, ' '); // Clean names (e.g. products.product_desc -> product desc)
-              headerRow.appendChild(th);
-            }
-            const thAction = document.createElement('th');
-            thAction.innerText = "Actions";
-            headerRow.appendChild(thAction);
-            table.appendChild(headerRow);
-            
-            for (const row of tile.data) {
-              const tr = document.createElement('tr');
-              for (const h of headers) {
-                const td = document.createElement('td');
-                const val = row[h];
-                if (h === 'inventory.stockout' && val === 'Yes') {
-                  td.innerHTML = `<span class="stockout-badge">Stockout</span>`;
-                } else {
-                  td.innerText = val !== null ? val : "";
-                }
-                tr.appendChild(td);
-              }
-              
-              const tdAction = document.createElement('td');
-              const sku = row['inventory.sku'] || row['sku'];
-              const storeId = row['inventory.store_id'] || row['store_id'];
-              const storeName = row['store.store_name'] || row['store_name'] || "Store " + storeId;
-              
-              if (sku && storeId) {
-                tdAction.innerHTML = `<button class="btn-run-rca" onclick="triggerRCA('${sku}', '${storeId}', '${storeName}')">Run RCA</button>`;
-              }
-              tr.appendChild(tdAction);
-              table.appendChild(tr);
-            }
-            tileDiv.appendChild(table);
-          } else {
-            tileDiv.innerHTML += `<div style="font-size: 14px; color: #5f6368;">No data returned.</div>`;
-          }
-          dashboardContainer.appendChild(tileDiv);
-        }
-      } catch (e) {
-        console.error("Failed to load dashboard:", e);
-        dashboardEmptyState.innerHTML = `<span class="material-icons" style="color:red;">error_outline</span><p style="color: red;">Failed to load dashboard: ${e.message}</p>`;
+    function submitTextResponse() {
+      const chatInput = document.getElementById('chatInput');
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      chatInput.value = "";
+      appendChatMessage('user', text);
+
+      const responses = [{
+        selected_option_ids: [],
+        write_in_response: text,
+        skipped: false
+      }];
+      submitInteractionResponse(responses);
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        submitTextResponse();
       }
     }
-
-    let pendingRCAData = null;
-
-    function triggerRCA(sku, storeId, storeName) {
-      pendingRCAData = { sku, storeId, storeName };
-      openContextModal();
-    }
-
-    function openContextModal() {
-      document.getElementById('rcaContextModal').style.display = 'block';
-      document.getElementById('contextText').value = '';
-      document.getElementById('contextFile').value = '';
-    }
-
-    function closeContextModal() {
-      document.getElementById('rcaContextModal').style.display = 'none';
-      pendingRCAData = null;
-    }
-
-    function submitRCAWithoutContext() {
-      if (!pendingRCAData) return;
-      const { sku, storeId, storeName } = pendingRCAData;
-      const query = `Stockout alert for SKU ${sku} in Store ${storeId} (${storeName})`;
-      closeContextModal();
-      startInvestigation(query);
-    }
-
-    async function submitRCAWithContext() {
-      if (!pendingRCAData) return;
-      const { sku, storeId, storeName } = pendingRCAData;
-      
-      const contextText = document.getElementById('contextText').value.trim();
-      const fileInput = document.getElementById('contextFile');
-      let fileContent = "";
-      
-      if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        if (file.type.startsWith('image/') || /\.(png|jpg|jpeg|gif|png)$/i.test(file.name)) {
-          alert("Only text-based files (.txt, .csv, .json, .md) are supported. Images cannot be uploaded as text context.");
-          return;
-        }
-        try {
-          fileContent = await readFileAsText(file);
-        } catch (e) {
-          alert("Failed to read uploaded file: " + e.message);
-          return;
-        }
-      }
-      
-      let query = `Stockout alert for SKU ${sku} in Store ${storeId} (${storeName})`;
-      let additionalContext = "";
-      
-      if (contextText) {
-        additionalContext += `User provided context/link: ${contextText}\n`;
-      }
-      if (fileContent) {
-        additionalContext += `Uploaded file content:\n${fileContent}\n`;
-      }
-      
-      closeContextModal();
-      startInvestigation(query, additionalContext);
-    }
-
-    function readFileAsText(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => resolve(event.target.result);
-        reader.onerror = (error) => reject(error);
-        reader.readAsText(file);
-      });
-    }
-
-    function openLookmlModal(title, code) {
-      document.getElementById('lookmlModalTitle').innerText = title;
-      document.getElementById('lookmlModalCode').innerText = code;
-      document.getElementById('lookmlModal').style.display = 'flex';
-    }
-
-    function closeLookmlModal() {
-      document.getElementById('lookmlModal').style.display = 'none';
-      document.getElementById('lookmlModalCode').innerText = '';
-    }
-
-    // Load default dashboard on startup
-    loadDashboard('Nq1GD8wyiQ2NMfyyfFjReY');
   </script>
-
-  <!-- RCA Context Modal -->
-  <div id="rcaContextModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeContextModal()">&times;</span>
-      <h3>Run RCA - Add Additional Context</h3>
-      <p style="font-size: 14px; color: #5f6368; margin-bottom: 20px;">
-        Optional: Provide additional local context (Description, URL, Drive link, or upload a document) to help the agent reason about the stockout.
-      </p>
-      
-      <div class="modal-form-group">
-        <label for="contextText">Description, Web URL, or Drive Link:</label>
-        <textarea id="contextText" rows="4" placeholder="Enter details, paste a URL or Drive link..."></textarea>
-      </div>
-      
-      <div class="modal-form-group">
-        <label for="contextFile">Upload Document (Text, CSV, JSON, MD):</label>
-        <input type="file" id="contextFile" accept=".txt,.csv,.json,.md">
-      </div>
-      
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="submitRCAWithoutContext()">Skip / Run RCA</button>
-        <button class="btn-primary" onclick="submitRCAWithContext()">Run with Context</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
