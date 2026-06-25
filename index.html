@@ -290,7 +290,7 @@
         <div id="investigationView" class="hidden absolute inset-0 flex h-full w-full bg-slate-50">
           
           <!-- Left Column Pane: Chat Conversation logs -->
-          <div class="w-[450px] lg:w-[500px] border-r border-outline-variant flex flex-col h-full bg-white shrink-0">
+          <div id="chatPane" class="w-[450px] lg:w-[500px] border-r border-outline-variant flex flex-col h-full bg-white shrink-0">
             <div class="bg-surface px-lg py-4 border-b border-outline-variant flex items-center justify-between shrink-0">
               <div class="flex items-center gap-2">
                 <span class="material-icons text-primary">chat_bubble</span>
@@ -315,7 +315,7 @@
           </div>
 
           <!-- Right Column Pane: Status Stepper, Terminal logs, Findings Card -->
-          <div class="flex-grow flex flex-col h-full overflow-y-auto p-lg gap-lg">
+          <div id="rightPane" class="flex-grow flex flex-col h-full overflow-y-auto p-lg gap-lg">
             
             <!-- Anomaly Target Card -->
             <div class="bg-error-container/20 border border-error/10 p-lg rounded-xl flex items-start gap-4 shrink-0">
@@ -440,6 +440,21 @@
     let eventSource = null;
     let activeInteractionQuestions = [];
     let pendingRCAData = null;
+
+    function showSplitLayout(show) {
+      const chatPane = document.getElementById('chatPane');
+      const rightPane = document.getElementById('rightPane');
+      
+      if (show) {
+        // Restore split layout
+        chatPane.className = "w-[450px] lg:w-[500px] border-r border-outline-variant flex flex-col h-full bg-white shrink-0";
+        rightPane.classList.remove('hidden');
+      } else {
+        // Full width chat pane, hide right pane
+        chatPane.className = "w-full flex flex-col h-full bg-white";
+        rightPane.classList.add('hidden');
+      }
+    }
 
     function triggerRCAWorkflow(sku, storeId, storeName) {
       pendingRCAData = { sku, storeId, storeName };
@@ -575,6 +590,7 @@
       // Swap view states
       document.getElementById('dashboardView').classList.add('hidden');
       document.getElementById('investigationView').classList.remove('hidden');
+      showSplitLayout(false);
       
       // Change header details
       document.getElementById('headerBackBtn').classList.remove('hidden');
@@ -753,6 +769,7 @@
       document.getElementById('findingsSolution').innerText = report.proposed_solution;
 
       // Swap views
+      showSplitLayout(true);
       document.getElementById('loadingStatusContainer').classList.add('hidden');
       document.getElementById('findingsContainer').classList.remove('hidden');
       document.getElementById('chatLog').classList.remove('hidden');
