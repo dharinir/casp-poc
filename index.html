@@ -1194,16 +1194,32 @@
               
               <!-- Bottom Grid (Proposed Solution & Model Integrity) -->
               <div class="bottom-grid">
-                <!-- Proposed Solution Card -->
-                <div class="card" style="min-height: auto; padding: 16px;">
-                  <div class="card-header-v2" style="margin-bottom: 12px; border-bottom: none; padding: 0;">
-                    <div class="card-title-container" style="display: flex; align-items: center; gap: 8px;">
-                      <span class="material-icons" style="color: #1a73e8; font-size: 20px;">lightbulb</span>
-                      <span class="card-title-v2" style="font-size: 14px; font-weight: 700; color: #202124;">Proposed Solution</span>
+                <!-- Left Stack: Actions & Solution -->
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <!-- Proactive Actions Card -->
+                  <div class="card" style="min-height: auto; padding: 16px;">
+                    <div class="card-header-v2" style="margin-bottom: 12px; border-bottom: none; padding: 0;">
+                      <div class="card-title-container" style="display: flex; align-items: center; gap: 8px;">
+                        <span class="material-icons" style="color: #34a853; font-size: 20px;">offline_pin</span>
+                        <span class="card-title-v2" style="font-size: 14px; font-weight: 700; color: #202124;">Proactive Actions Taken</span>
+                      </div>
+                    </div>
+                    <div class="card-body-v2" id="proactiveActionsBody" style="font-size: 13px; line-height: 1.6; padding: 0; color: #3c4043;">
+                      <!-- Content -->
                     </div>
                   </div>
-                  <div class="card-body-v2" id="proposedSolutionBody" style="font-size: 13px; line-height: 1.6; padding: 0; color: #3c4043;">
-                    <!-- Content -->
+
+                  <!-- Proposed Solution Card -->
+                  <div class="card" style="min-height: auto; padding: 16px;">
+                    <div class="card-header-v2" style="margin-bottom: 12px; border-bottom: none; padding: 0;">
+                      <div class="card-title-container" style="display: flex; align-items: center; gap: 8px;">
+                        <span class="material-icons" style="color: #1a73e8; font-size: 20px;">lightbulb</span>
+                        <span class="card-title-v2" style="font-size: 14px; font-weight: 700; color: #202124;">Proposed Solution</span>
+                      </div>
+                    </div>
+                    <div class="card-body-v2" id="proposedSolutionBody" style="font-size: 13px; line-height: 1.6; padding: 0; color: #3c4043;">
+                      <!-- Content -->
+                    </div>
                   </div>
                 </div>
                 
@@ -1769,7 +1785,13 @@
         </div>
       `;
 
-      // 3. Populate Proposed Solution Body
+      // 3. Populate Proactive Actions Body
+      const actionsText = report.proactive_actions_taken || "Generated missing semantic layer view files in Looker.";
+      let cleanedActionsText = actionsText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      cleanedActionsText = cleanedActionsText.replace(/`/g, '<code>$1</code>');
+      document.getElementById('proactiveActionsBody').innerHTML = `<p style="margin:0;">${cleanedActionsText}</p>`;
+
+      // 4. Populate Proposed Solution Body
       const solutionText = report.proposed_solution || "Model the unmodeled tables in Looker to enable visibility.";
       let cleanedSolutionText = solutionText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       cleanedSolutionText = cleanedSolutionText.replace(/`/g, '<code>$1</code>');
